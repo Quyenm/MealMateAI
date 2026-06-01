@@ -34,6 +34,7 @@ export async function POST(req: Request) {
 
   // Quota pre-check (no token spend if already at the limit).
   const quota = await getQuota(user.id);
+  console.log("[suggest] pre-check quota", JSON.stringify(quota));
   if (quota && quota.remaining <= 0) {
     return NextResponse.json({ error: "quota_exceeded", quota }, { status: 402 });
   }
@@ -52,6 +53,7 @@ export async function POST(req: Request) {
 
   // Commit the billable scan atomically (guards against races).
   const committed = await commitScan(user.id);
+  console.log("[suggest] committed", committed.ok);
   if (!committed.ok) {
     return NextResponse.json({ error: "quota_exceeded" }, { status: 402 });
   }
