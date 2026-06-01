@@ -49,5 +49,8 @@ _flows.txt
 _arch.txt
 _buildplan.txt
 
-# leftover empty dir from restructure
+# local-only folders (docs/research/leftover), not in repo
 /mealmate/
+/docs/
+
+.vercel
