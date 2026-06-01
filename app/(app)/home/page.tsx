@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import Link from "next/link";
 import { SignOutButton } from "@/components/sign-out-button";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -55,12 +56,9 @@ export default async function HomePage() {
         </CardContent>
       </Card>
 
-      <Button size="lg" className="w-full" disabled>
-        Chụp tủ lạnh (sắp có)
-      </Button>
-      <p className="text-center text-xs text-muted-foreground">
-        Core loop scan → gợi món sẽ làm ở bước M2.
-      </p>
+      <Link href="/scan" className={buttonVariants({ size: "lg", className: "w-full" })}>
+        Chụp tủ lạnh
+      </Link>
     </main>
   );
 }
