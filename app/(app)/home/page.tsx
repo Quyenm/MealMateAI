@@ -61,6 +61,12 @@ export default async function HomePage() {
       <Link href="/scan" className={buttonVariants({ size: "lg", className: "w-full" })}>
         Chụp tủ lạnh
       </Link>
+      <Link
+        href="/upgrade"
+        className={buttonVariants({ variant: "ghost", size: "sm", className: "w-full" })}
+      >
+        Xem các gói
+      </Link>
     </main>
   );
 }

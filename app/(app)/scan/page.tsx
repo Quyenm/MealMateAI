@@ -111,7 +111,7 @@ export default function ScanPage() {
       });
       if (res.status === 402) {
         toast.error("Hết lượt quét hôm nay", { description: "Quay lại mai hoặc nâng gói." });
-        router.push("/home");
+        router.push("/upgrade");
         return;
       }
       if (!res.ok) {
