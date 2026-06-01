@@ -1,0 +1,17 @@
+# Research / scratch artifacts (kept locally, not committed)
+_extract/
+_docx_text.txt
+_chunk_*.txt
+_notes_full.txt
+_flows.txt
+_arch.txt
+_buildplan.txt
+
+# Env (belt-and-suspenders; mealmate/.gitignore also covers this)
+.env
+.env.*
+!.env.example
+
+# OS
+Thumbs.db
+.DS_Store
