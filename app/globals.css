@@ -48,6 +48,28 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+/* MealMate landing — warm appetite ramp + tiered tinted shadows + fluid type.
+   Warm tones are capped at ~5% of any viewport (FIFO flame, cook-time pills,
+   one featured dish, the highlighted value word). Sky-blue stays structural. */
+@theme {
+  --color-warm-50: #fff7ee;
+  --color-warm-100: #fde7cf;
+  --color-warm-200: #fbd9b4;
+  --color-warm-400: #f7b267;
+  --color-warm-600: #e0843f;
+  --color-flame: #ef6c3a;
+
+  /* Shadows are tinted (warm near-black / blue / warm), never pure black on cream. */
+  --shadow-card: 0 1px 2px rgba(47, 42, 37, 0.04), 0 10px 28px -14px rgba(47, 42, 37, 0.18);
+  --shadow-float: 0 28px 64px -28px rgba(43, 163, 217, 0.34), 0 6px 18px -10px rgba(47, 42, 37, 0.12);
+  --shadow-warm: 0 28px 60px -24px rgba(224, 132, 63, 0.34);
+
+  /* Fluid editorial type scale. */
+  --text-hero: clamp(40px, 6vw, 76px);
+  --text-h2: clamp(28px, 3.5vw, 44px);
+  --text-stat: clamp(36px, 4.5vw, 60px);
+}
+
 :root {
   /* MealMate AI brand — warm cream + sky-blue (robot/logo) */
   --background: #fcfaf6;
@@ -61,7 +83,7 @@
   --secondary: #f3eee6;
   --secondary-foreground: #2f2a25;
   --muted: #f3eee6;
-  --muted-foreground: #837a6f;
+  --muted-foreground: #6e655a; /* darkened from #837a6f for WCAG AA on cream + warm bands */
   --accent: #fdeede;
   --accent-foreground: #8a4b25;
   --destructive: oklch(0.577 0.245 27.325);
@@ -127,5 +149,21 @@
   }
   html {
     @apply font-sans;
+  }
+  /* Visible keyboard focus for raw anchors / accordion summaries
+     (shadcn buttons already ship focus-visible rings). */
+  a:focus-visible,
+  summary:focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+/* Smooth in-page anchor scrolling (Cách hoạt động / Tính năng / Bảng giá),
+   disabled when the user prefers reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
   }
 }

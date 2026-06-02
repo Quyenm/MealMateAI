@@ -56,3 +56,7 @@ QR_MoMo.jpg
 logo_company.jpg
 
 .vercel
+
+# local dev/prod server logs + review screenshots (scratch, not product assets)
+*.log
+screenshot/
