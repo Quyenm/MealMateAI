@@ -7,9 +7,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
-const BANK = process.env.PAYMENT_BANK;
-const ACCOUNT = process.env.PAYMENT_ACCOUNT;
-const NAME = process.env.PAYMENT_ACCOUNT_NAME;
+// Receiving account (MoMo / napas247 VietQR).
+const MOMO_PHONE = "0336427958";
+const MOMO_NAME = "Nguyễn Mạnh Quyền";
 
 export default async function PayPage({
   searchParams,
@@ -30,50 +30,42 @@ export default async function PayPage({
     .maybeSingle();
   if (!t || t.price_vnd <= 0) redirect("/upgrade");
 
-  const configured = !!(BANK && ACCOUNT && NAME);
-  // Transfer note that lets the admin match a bank transfer to this user + tier.
+  // Note lets the admin match a transfer to this user + tier.
   const note = `MM ${(tier ?? "").toUpperCase()} ${user.id.slice(0, 6)}`;
-  const qrUrl = configured
-    ? `https://img.vietqr.io/image/${BANK}-${ACCOUNT}-compact2.png?amount=${t.price_vnd}` +
-      `&addInfo=${encodeURIComponent(note)}&accountName=${encodeURIComponent(NAME!)}`
-    : null;
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
       <h1 className="text-lg font-semibold">Thanh toán — {t.display_label}</h1>
 
-      {!configured ? (
-        <Card>
-          <CardContent className="py-6 text-sm text-muted-foreground">
-            Chưa cấu hình tài khoản nhận tiền. Cần đặt biến môi trường{" "}
-            <code>PAYMENT_BANK</code>, <code>PAYMENT_ACCOUNT</code>,{" "}
-            <code>PAYMENT_ACCOUNT_NAME</code>.
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Quét QR để chuyển khoản</CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col items-center gap-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={qrUrl!} alt="QR chuyển khoản" className="w-64 rounded-lg border" />
-            <div className="w-full space-y-1 text-sm">
-              <p>
-                Số tiền: <b>{t.price_vnd.toLocaleString("vi-VN")}đ</b>
-              </p>
-              <p>
-                Nội dung (GIỮ NGUYÊN): <b>{note}</b>
-              </p>
-            </div>
-            <p className="text-center text-xs text-muted-foreground">
-              Quét bằng app ngân hàng hoặc Momo — số tiền &amp; nội dung đã điền sẵn.
-              Đừng đổi nội dung để bên mình nhận đúng gói cho bạn.
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Chuyển khoản qua MoMo / VietQR</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/momo-qr.jpg"
+            alt="QR chuyển khoản MoMo"
+            className="w-60 rounded-lg border"
+          />
+          <div className="w-full space-y-1 text-sm">
+            <p>
+              Người nhận: <b>{MOMO_NAME}</b> (MoMo {MOMO_PHONE})
             </p>
-            <PaidButton />
-          </CardContent>
-        </Card>
-      )}
+            <p>
+              Số tiền: <b>{t.price_vnd.toLocaleString("vi-VN")}đ</b>
+            </p>
+            <p>
+              Nội dung: <b>{note}</b>
+            </p>
+          </div>
+          <p className="text-center text-xs text-muted-foreground">
+            Quét QR bằng MoMo hoặc app ngân hàng (hỗ trợ napas247). Nhớ nhập đúng{" "}
+            <b>số tiền</b> và <b>nội dung</b> ở trên để bên mình nâng đúng gói cho bạn.
+          </p>
+          <PaidButton />
+        </CardContent>
+      </Card>
 
       <Link href="/upgrade" className={buttonVariants({ variant: "ghost", size: "sm" })}>
         ← Các gói

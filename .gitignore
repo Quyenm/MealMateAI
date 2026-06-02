@@ -52,5 +52,6 @@ _buildplan.txt
 # local-only folders (docs/research/leftover), not in repo
 /mealmate/
 /docs/
+QR_MoMo.jpg
 
 .vercel
