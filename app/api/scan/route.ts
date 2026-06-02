@@ -1,11 +1,17 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { recognizeIngredients } from "@/lib/ai/openai";
 import { underSpendCap, recordSpend } from "@/lib/spend-guard";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
+
+const ScanBody = z.object({
+  imageDataUrl: z.string().startsWith("data:image/").max(2_200_000),
+});
 
 /** Vision step: image -> ingredient list. NOT quota-billed (quota is decremented on /api/suggest). */
 export async function POST(req: Request) {
@@ -15,14 +21,21 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const body = await req.json().catch(() => ({}));
-  const imageDataUrl: unknown = body?.imageDataUrl;
-  if (typeof imageDataUrl !== "string" || !imageDataUrl.startsWith("data:image/")) {
-    return NextResponse.json({ error: "bad_image" }, { status: 400 });
+  if (!(await rateLimit("scan", user.id)).ok) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
   }
-  if (imageDataUrl.length > 2_200_000) {
+
+  // Reject oversized payloads before parsing the whole body.
+  if (Number(req.headers.get("content-length") || 0) > 3_000_000) {
     return NextResponse.json({ error: "image_too_large" }, { status: 413 });
   }
+
+  const body = await req.json().catch(() => null);
+  const parsed = ScanBody.safeParse(body);
+  if (!parsed.success) {
+    return NextResponse.json({ error: "bad_image" }, { status: 400 });
+  }
+  const { imageDataUrl } = parsed.data;
 
   if (!(await underSpendCap())) {
     return NextResponse.json({ error: "service_paused" }, { status: 503 });

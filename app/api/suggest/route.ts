@@ -1,12 +1,29 @@
 import { NextResponse } from "next/server";
+import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { suggestDishes, type Ingredient } from "@/lib/ai/openai";
 import { underSpendCap, recordSpend } from "@/lib/spend-guard";
 import { getQuota, commitScan } from "@/lib/quota";
+import { rateLimit } from "@/lib/ratelimit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
 export const dynamic = "force-dynamic";
+
+const SuggestBody = z.object({
+  ingredients: z
+    .array(
+      z.object({
+        name_vi: z.string().min(1).max(80),
+        name_en: z.string().max(80).optional(),
+        confidence: z.number().optional(),
+        expiring: z.boolean().optional(),
+      }),
+    )
+    .min(1)
+    .max(40),
+  prefs: z.record(z.string(), z.unknown()).optional(),
+});
 
 const STAPLES = [
   "muối", "dầu", "nước mắm", "đường", "tiêu", "nước", "bột ngọt", "hạt nêm",
@@ -26,15 +43,19 @@ export async function POST(req: Request) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
 
-  const body = await req.json().catch(() => ({}));
-  const ingredients: Ingredient[] = Array.isArray(body?.ingredients) ? body.ingredients : [];
-  if (!ingredients.length) {
+  if (!(await rateLimit("suggest", user.id)).ok) {
+    return NextResponse.json({ error: "rate_limited" }, { status: 429 });
+  }
+
+  const body = await req.json().catch(() => null);
+  const parsed = SuggestBody.safeParse(body);
+  if (!parsed.success) {
     return NextResponse.json({ error: "no_ingredients" }, { status: 400 });
   }
+  const ingredients = parsed.data.ingredients as Ingredient[];
 
   // Quota pre-check (no token spend if already at the limit).
   const quota = await getQuota(user.id);
-  console.log("[suggest] pre-check quota", JSON.stringify(quota));
   if (quota && quota.remaining <= 0) {
     return NextResponse.json({ error: "quota_exceeded", quota }, { status: 402 });
   }
@@ -44,7 +65,7 @@ export async function POST(req: Request) {
 
   let result;
   try {
-    result = await suggestDishes(ingredients, body?.prefs);
+    result = await suggestDishes(ingredients, parsed.data.prefs);
     await recordSpend(result.cost);
   } catch (e) {
     console.error("/api/suggest failed", e);
@@ -53,7 +74,6 @@ export async function POST(req: Request) {
 
   // Commit the billable scan atomically (guards against races).
   const committed = await commitScan(user.id);
-  console.log("[suggest] committed", committed.ok);
   if (!committed.ok) {
     return NextResponse.json({ error: "quota_exceeded" }, { status: 402 });
   }

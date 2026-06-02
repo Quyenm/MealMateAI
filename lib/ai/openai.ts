@@ -100,6 +100,14 @@ function costOf(usage: OpenAI.Completions.CompletionUsage | undefined): number {
   return (usage.prompt_tokens || 0) * PRICE_IN + (usage.completion_tokens || 0) * PRICE_OUT;
 }
 
+/** Parse the model's JSON content; throw (so the route returns a retryable 502)
+ *  instead of silently degrading to an empty result on a refusal/empty completion. */
+function parseJsonContent(res: OpenAI.Chat.Completions.ChatCompletion): unknown {
+  const content = res.choices[0]?.message?.content;
+  if (!content) throw new Error("openai_empty_content");
+  return JSON.parse(content);
+}
+
 export async function recognizeIngredients(imageDataUrl: string) {
   const res = await client().chat.completions.create({
     model: MODEL,
@@ -118,7 +126,7 @@ export async function recognizeIngredients(imageDataUrl: string) {
       json_schema: { name: "ingredient_list", strict: true, schema: INGREDIENTS_SCHEMA },
     },
   });
-  const parsed = JSON.parse(res.choices[0]?.message?.content || "{}");
+  const parsed = parseJsonContent(res) as { ingredients?: Ingredient[] };
   const ingredients = (parsed.ingredients ?? []) as Ingredient[];
   return { ingredients, cost: costOf(res.usage) };
 }
@@ -138,7 +146,7 @@ export async function suggestDishes(
       json_schema: { name: "dish_suggestions", strict: true, schema: DISHES_SCHEMA },
     },
   });
-  const parsed = JSON.parse(res.choices[0]?.message?.content || "{}");
+  const parsed = parseJsonContent(res) as { dishes?: Dish[] };
   const dishes = ((parsed.dishes ?? []) as Dish[]).slice(0, 3);
   return { dishes, cost: costOf(res.usage) };
 }

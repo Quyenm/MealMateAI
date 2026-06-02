@@ -12,18 +12,23 @@ export function PaidButton({ tier }: { tier: string }) {
   async function confirm() {
     setLoading(true);
     try {
-      await fetch("/api/payments/claim", {
+      const res = await fetch("/api/payments/claim", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ tier }),
       });
+      if (!res.ok) throw new Error(String(res.status));
+      // Only confirm + leave the page once the claim is actually recorded.
+      toast.success("Đã ghi nhận!", {
+        description: "Bên mình sẽ kiểm tra chuyển khoản và nâng gói trong ít phút.",
+      });
+      router.push("/home");
     } catch {
-      // ignore — the claim is best-effort; admin verifies against MoMo anyway
+      toast.error("Chưa gửi được", {
+        description: "Kiểm tra kết nối mạng rồi bấm lại nhé. Tiền của bạn vẫn an toàn.",
+      });
+      setLoading(false);
     }
-    toast.success("Đã ghi nhận!", {
-      description: "Bên mình sẽ kiểm tra chuyển khoản và nâng gói trong ít phút.",
-    });
-    router.push("/home");
   }
 
   return (
