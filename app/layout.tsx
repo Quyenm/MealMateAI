@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -16,7 +16,11 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "MealMate AI",
   description: "Chụp tủ lạnh — AI gợi ý món nấu được ngay.",
+  appleWebApp: { capable: true, title: "MealMate", statusBarStyle: "default" },
+  icons: { apple: "/icon-192.png" },
 };
+
+export const viewport: Viewport = { themeColor: "#16a34a" };
 
 export default function RootLayout({
   children,
