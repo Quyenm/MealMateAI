@@ -354,7 +354,7 @@ export function LandingClient({ authed, tiers }: { authed: boolean; tiers: Landi
         <motion.div {...reveal()} className="flex flex-col items-center gap-5 rounded-[2.5rem] bg-gradient-to-br from-[#2ba3d9] to-[#1b7aa8] px-6 py-16 text-center text-white shadow-xl">
           <h2 className="max-w-xl text-3xl font-bold tracking-tight sm:text-4xl">Sẵn sàng hết cảnh &quot;tối nay ăn gì&quot;?</h2>
           <p className="max-w-md text-white/90">Tạo tài khoản miễn phí, chụp tủ lạnh, để AI lo phần còn lại.</p>
-          <Link href={primaryHref} className={buttonVariants({ size: "lg", className: "bg-white px-8 text-foreground hover:bg-white/90" })}>{primaryLabel}</Link>
+          <Link href={primaryHref} className="inline-flex h-11 items-center justify-center rounded-xl bg-white px-8 text-sm font-semibold text-[#1b7aa8] shadow-sm transition hover:bg-white/90">{primaryLabel}</Link>
         </motion.div>
       </section>
 
