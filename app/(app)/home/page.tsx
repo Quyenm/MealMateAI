@@ -61,12 +61,20 @@ export default async function HomePage() {
       <Link href="/scan" className={buttonVariants({ size: "lg", className: "w-full" })}>
         Chụp tủ lạnh
       </Link>
-      <Link
-        href="/upgrade"
-        className={buttonVariants({ variant: "ghost", size: "sm", className: "w-full" })}
-      >
-        Xem các gói
-      </Link>
+      <div className="flex gap-2">
+        <Link
+          href="/history"
+          className={buttonVariants({ variant: "outline", size: "sm", className: "flex-1" })}
+        >
+          Lịch sử
+        </Link>
+        <Link
+          href="/upgrade"
+          className={buttonVariants({ variant: "ghost", size: "sm", className: "flex-1" })}
+        >
+          Xem các gói
+        </Link>
+      </div>
     </main>
   );
 }
