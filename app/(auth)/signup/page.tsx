@@ -61,7 +61,9 @@ export default function SignupPage() {
   }
 
   return (
-    <main className="flex flex-1 items-center justify-center p-4">
+    <main className="flex flex-1 flex-col items-center justify-center gap-6 p-4">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo.jpg" alt="MealMate AI" className="h-20 w-20 rounded-2xl shadow-sm" />
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Đăng ký</CardTitle>

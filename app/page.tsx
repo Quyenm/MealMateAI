@@ -10,6 +10,8 @@ export default async function Landing() {
 
   return (
     <main className="flex flex-1 flex-col items-center justify-center gap-6 p-8 text-center">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/logo.jpg" alt="MealMate AI" className="h-28 w-28 rounded-3xl shadow-sm" />
       <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">MealMate AI</h1>
       <p className="max-w-md text-muted-foreground">
         Chụp tủ lạnh — AI gợi ý món nấu được ngay trong vài giây, ưu tiên đồ sắp

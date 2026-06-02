@@ -36,9 +36,13 @@ export default async function HomePage() {
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 p-6">
       <header className="flex items-center justify-between">
-        <div>
-          <p className="text-sm text-muted-foreground">Xin chào</p>
-          <p className="font-medium">{user.email}</p>
+        <div className="flex items-center gap-3">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.jpg" alt="MealMate AI" className="h-10 w-10 rounded-xl" />
+          <div>
+            <p className="text-sm text-muted-foreground">Xin chào</p>
+            <p className="font-medium">{user.email}</p>
+          </div>
         </div>
         <SignOutButton />
       </header>
