@@ -51,9 +51,9 @@ export function PhoneFrame({ children, className }: { children: ReactNode; class
       <div className="pointer-events-none absolute inset-0 z-30 rounded-[1.9rem] ring-1 ring-white/10" />
       <div className="relative overflow-hidden rounded-[1.9rem] bg-background">
         <div className="pointer-events-none absolute inset-0 z-30 bg-gradient-to-br from-white/12 via-transparent to-transparent" />
-        <div className="relative flex h-10 items-center justify-between px-5 pt-1 text-[12px] font-semibold text-foreground">
+        <div className="relative flex h-10 items-center justify-between px-4 pt-1 text-[12px] font-semibold text-foreground">
           <span className="tabular-nums tracking-tight">9:41</span>
-          <span className="absolute left-1/2 top-[7px] h-[24px] w-[80px] -translate-x-1/2 rounded-full bg-foreground" />
+          <span className="absolute left-1/2 top-[8px] h-[20px] w-[58px] -translate-x-1/2 rounded-full bg-foreground" />
           <IosStatusIcons />
         </div>
         {children}
