@@ -9,7 +9,7 @@ import { NextResponse, type NextRequest } from 'next/server'
  */
 
 // Routes that require an authenticated user.
-const PROTECTED_PREFIXES = ['/home', '/scan', '/recipe', '/history', '/settings', '/upgrade']
+const PROTECTED_PREFIXES = ['/home', '/scan', '/recipe', '/history', '/settings', '/upgrade', '/admin']
 // Auth pages a signed-in user shouldn't see.
 const AUTH_PAGES = ['/login', '/signup']
 

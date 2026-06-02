@@ -63,7 +63,7 @@ export default async function PayPage({
             Quét QR bằng MoMo hoặc app ngân hàng (hỗ trợ napas247). Nhớ nhập đúng{" "}
             <b>số tiền</b> và <b>nội dung</b> ở trên để bên mình nâng đúng gói cho bạn.
           </p>
-          <PaidButton />
+          <PaidButton tier={tier ?? ""} />
         </CardContent>
       </Card>
 
