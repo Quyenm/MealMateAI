@@ -116,6 +116,7 @@ export const STR = {
       saveFromScan: "Lưu vào tủ lạnh",
       savedToast: "Đã lưu vào tủ lạnh",
       deductedToast: "Đã cập nhật tủ lạnh",
+      leftoversSaved: "Đã cất đồ thừa vào tủ lạnh",
     },
     mealPlan: {
       title: "Thực đơn tuần",
@@ -197,6 +198,8 @@ export const STR = {
       scanAgain: "Quét lần nữa",
       backToList: "Quay lại danh sách",
       cookThis: "Vào bếp",
+      fridgeReminder: "Tủ lạnh còn — chạm để thêm vào:",
+      fridgeAddAll: "Thêm tất cả",
       almostBadge: "Gần nấu được",
       rateLabel: "Đánh giá:",
       kcalUnit: "kcal",
@@ -562,6 +565,7 @@ export const STR = {
       saveFromScan: "Save to fridge",
       savedToast: "Saved to fridge",
       deductedToast: "Fridge updated",
+      leftoversSaved: "Leftovers saved to your fridge",
     },
     mealPlan: {
       title: "Weekly menu",
@@ -643,6 +647,8 @@ export const STR = {
       scanAgain: "Scan again",
       backToList: "Back to list",
       cookThis: "Start cooking",
+      fridgeReminder: "Still in your fridge — tap to add:",
+      fridgeAddAll: "Add all",
       almostBadge: "Almost there",
       rateLabel: "Rate:",
       kcalUnit: "kcal",

@@ -13,7 +13,7 @@ const Item = z.object({
 });
 
 const Body = z.object({
-  action: z.enum(["add", "update", "remove", "deduct"]),
+  action: z.enum(["add", "update", "remove", "deduct", "list", "stock"]),
   items: z.array(Item).max(60).optional(),
   id: z.string().uuid().optional(),
   expiry_date: z.string().max(20).nullable().optional(),
@@ -44,6 +44,50 @@ export async function POST(req: Request) {
   const hid = hm?.household_id ?? null;
   // Filter that scopes a query to the user's own rows OR their household's.
   const scope = hid ? `user_id.eq.${user.id},household_id.eq.${hid}` : null;
+
+  if (action === "list") {
+    let sel = admin
+      .from("inventory_items")
+      .select("id, name, name_en, amount, expiry_date")
+      .order("created_at", { ascending: true });
+    sel = scope ? sel.or(scope) : sel.eq("user_id", user.id);
+    const { data } = await sel;
+    return NextResponse.json({ ok: true, items: data ?? [] });
+  }
+
+  // Like add, but skips names already in the fridge — used to stock the
+  // leftovers after cooking without piling up duplicates.
+  if (action === "stock" && items?.length) {
+    let sel = admin.from("inventory_items").select("name, name_en");
+    sel = scope ? sel.or(scope) : sel.eq("user_id", user.id);
+    const { data: existing } = await sel;
+    const have = new Set(
+      (existing ?? []).flatMap((r) =>
+        [norm(r.name), r.name_en ? norm(r.name_en) : ""].filter(Boolean),
+      ),
+    );
+    const fresh = items.filter((it) => {
+      const n = norm(it.name);
+      const ne = it.name_en ? norm(it.name_en) : "";
+      return n.length > 1 && !have.has(n) && (!ne || !have.has(ne));
+    });
+    if (!fresh.length) return NextResponse.json({ ok: true, added: 0 });
+    const { error } = await admin.from("inventory_items").insert(
+      fresh.map((it) => ({
+        user_id: user.id,
+        household_id: hid,
+        name: it.name,
+        name_en: it.name_en ?? null,
+        amount: it.amount ?? null,
+        expiry_date: it.expiry_date || null,
+      })),
+    );
+    if (error) {
+      console.error("/api/inventory stock failed", error);
+      return NextResponse.json({ error: "add_failed" }, { status: 500 });
+    }
+    return NextResponse.json({ ok: true, added: fresh.length });
+  }
 
   if (action === "add") {
     const rows = (items ?? []).map((it) => ({

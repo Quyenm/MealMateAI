@@ -68,6 +68,9 @@ function youtubeSearch(query: string) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent("cách làm " + query)}`;
 }
 
+type FridgeItem = { name: string; name_en?: string | null; amount?: string | null };
+const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").trim();
+
 export default function ScanPage() {
   const router = useRouter();
   const t = useT();
@@ -83,6 +86,7 @@ export default function ScanPage() {
   const [selectedDish, setSelectedDish] = useState<number | null>(null);
   const [scanId, setScanId] = useState<string | null>(null);
   const [cooking, setCooking] = useState(false);
+  const [fridgeItems, setFridgeItems] = useState<FridgeItem[]>([]);
 
   const amountLabel = (a?: Ingredient["amount"]) =>
     a === "low" ? t.scan.amountLow : a === "medium" ? t.scan.amountMedium : a === "high" ? t.scan.amountHigh : null;
@@ -96,6 +100,11 @@ export default function ScanPage() {
   const dishMissing = (d: Dish) =>
     (en ? d.missing_ingredients_en || d.missing_ingredients : d.missing_ingredients) || [];
   const selected = selectedDish !== null ? dishes[selectedDish] : undefined;
+  // Fridge items the user hasn't added to this scan yet — shown as a reminder.
+  const fridgeNotInList = (() => {
+    const have = new Set(ingredients.map((g) => norm(g.name_vi)));
+    return fridgeItems.filter((f) => !have.has(norm(f.name)));
+  })();
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -112,6 +121,7 @@ export default function ScanPage() {
   async function analyze() {
     if (!imageData) return;
     setStep("recognizing");
+    loadFridge(); // so the confirm step can remind what's already in the fridge
     try {
       const res = await fetch("/api/scan", {
         method: "POST",
@@ -187,6 +197,36 @@ export default function ScanPage() {
     }
   }
 
+  async function loadFridge() {
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "list" }),
+      });
+      if (res.ok) setFridgeItems((await res.json()).items ?? []);
+    } catch {
+      /* non-blocking */
+    }
+  }
+
+  function addFromFridge(f: FridgeItem) {
+    setIngredients((xs) =>
+      xs.some((g) => norm(g.name_vi) === norm(f.name))
+        ? xs
+        : [...xs, { name_vi: f.name, name_en: f.name_en ?? f.name, expiring: false }],
+    );
+  }
+  function addAllFromFridge() {
+    setIngredients((xs) => {
+      const have = new Set(xs.map((g) => norm(g.name_vi)));
+      const add = fridgeItems
+        .filter((f) => !have.has(norm(f.name)))
+        .map((f) => ({ name_vi: f.name, name_en: f.name_en ?? f.name, expiring: false }));
+      return [...xs, ...add];
+    });
+  }
+
   async function saveToFridge() {
     if (!ingredients.length) return;
     try {
@@ -194,7 +234,7 @@ export default function ScanPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          action: "add",
+          action: "stock",
           items: ingredients.map((g) => ({ name: g.name_vi, name_en: g.name_en, amount: g.amount })),
         }),
       });
@@ -202,6 +242,30 @@ export default function ScanPage() {
       toast.success(t.fridge.savedToast);
     } catch {
       toast.error(t.scan.toast.netErr);
+    }
+  }
+
+  // After cooking: the scanned ingredients NOT used by the dish are leftovers —
+  // tuck them into the fridge (skips ones already there) so the next scan knows.
+  async function stockLeftovers(used: string[]) {
+    const u = used.map(norm).filter((s) => s.length > 1);
+    const leftovers = ingredients.filter((g) => {
+      const n = norm(g.name_vi);
+      return n.length > 1 && !u.some((x) => n.includes(x) || x.includes(n));
+    });
+    if (!leftovers.length) return;
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "stock",
+          items: leftovers.map((g) => ({ name: g.name_vi, name_en: g.name_en, amount: g.amount })),
+        }),
+      });
+      if (res.ok && (await res.json()).added > 0) toast.success(t.fridge.leftoversSaved);
+    } catch {
+      /* non-blocking */
     }
   }
 
@@ -386,6 +450,33 @@ export default function ScanPage() {
             )}
           </div>
 
+          {fridgeNotInList.length > 0 && (
+            <div className="flex flex-col gap-2 rounded-2xl bg-warm-50 p-3 ring-1 ring-warm-400/40">
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8a4b25]">
+                <Refrigerator className="size-4" /> {t.scan.fridgeReminder}
+              </div>
+              <div className="flex flex-wrap gap-1.5">
+                {fridgeNotInList.map((f, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => addFromFridge(f)}
+                    className="rounded-full border border-warm-400/50 bg-background px-2.5 py-1 text-xs font-medium transition hover:bg-warm-50"
+                  >
+                    + {en && f.name_en ? f.name_en : f.name}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                onClick={addAllFromFridge}
+                className="self-start text-xs font-semibold text-primary hover:underline"
+              >
+                {t.scan.fridgeAddAll}
+              </button>
+            </div>
+          )}
+
           <div className="flex gap-2">
             <Input
               value={newName}
@@ -548,7 +639,9 @@ export default function ScanPage() {
               defaultMin={selected.cook_time_min}
               onClose={() => setCooking(false)}
               onFinish={() => {
-                deductFromFridge(selected.uses_ingredients ?? []);
+                const used = selected.uses_ingredients ?? [];
+                deductFromFridge(used); // remove what the dish consumed...
+                stockLeftovers(used); // ...and keep the rest for next time
                 logMacros(selected);
               }}
             />
