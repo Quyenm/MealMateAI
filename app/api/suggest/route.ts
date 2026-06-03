@@ -130,5 +130,10 @@ export async function POST(req: Request) {
   }
 
   const newQuota = await getQuota(user.id);
-  return NextResponse.json({ dishes, quota: newQuota, noMatch: dishes.length === 0 });
+  return NextResponse.json({
+    scanId: scan?.id ?? null,
+    dishes,
+    quota: newQuota,
+    noMatch: dishes.length === 0,
+  });
 }

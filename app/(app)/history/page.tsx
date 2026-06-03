@@ -4,6 +4,7 @@ import { ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
 import { STR } from "@/lib/i18n/strings";
+import { StarRating } from "@/components/star-rating";
 import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
@@ -36,14 +37,19 @@ export default async function HistoryPage() {
   const t = s.history;
   const dateLocale = locale === "en" ? "en-US" : "vi-VN";
 
-  const { data } = await supabase
-    .from("scans")
-    .select("id, created_at, scan_ingredients(name_vi), suggestions(dishes)")
-    .eq("user_id", user.id)
-    .eq("status", "suggested")
-    .order("created_at", { ascending: false })
-    .limit(30);
+  const [{ data }, { data: ratingRows }] = await Promise.all([
+    supabase
+      .from("scans")
+      .select("id, created_at, scan_ingredients(name_vi), suggestions(dishes)")
+      .eq("user_id", user.id)
+      .eq("status", "suggested")
+      .order("created_at", { ascending: false })
+      .limit(30),
+    supabase.from("ratings").select("scan_id, dish_index, stars").eq("user_id", user.id),
+  ]);
   const scans = (data ?? []) as unknown as Scan[];
+  const ratingOf = new Map<string, number>();
+  (ratingRows ?? []).forEach((r) => ratingOf.set(`${r.scan_id}:${r.dish_index}`, r.stars));
 
   return (
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4 lg:p-8">
@@ -106,6 +112,14 @@ export default async function HistoryPage() {
                       ))}
                     </ol>
                   )}
+                  <div className="mt-3">
+                    <StarRating
+                      scanId={sc.id}
+                      dishIndex={i}
+                      dishTitle={d.title_vi}
+                      initial={ratingOf.get(`${sc.id}:${i}`) ?? 0}
+                    />
+                  </div>
                 </details>
               ))}
               {dishes.length === 0 && <p className="text-sm text-muted-foreground">{t.noDish}</p>}

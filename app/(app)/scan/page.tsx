@@ -14,6 +14,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { useT } from "@/components/landing/i18n";
+import { StarRating } from "@/components/star-rating";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -66,6 +67,7 @@ export default function ScanPage() {
   const [newName, setNewName] = useState("");
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [openDish, setOpenDish] = useState<number | null>(0);
+  const [scanId, setScanId] = useState<string | null>(null);
 
   const amountLabel = (a?: Ingredient["amount"]) =>
     a === "low" ? t.scan.amountLow : a === "medium" ? t.scan.amountMedium : a === "high" ? t.scan.amountHigh : null;
@@ -150,6 +152,7 @@ export default function ScanPage() {
       }
       const data = await res.json();
       setDishes(data.dishes ?? []);
+      setScanId(data.scanId ?? null);
       setOpenDish(0);
       setStep("results");
       if (data.noMatch) {
@@ -167,6 +170,7 @@ export default function ScanPage() {
     setImageData(null);
     setIngredients([]);
     setDishes([]);
+    setScanId(null);
   }
 
   return (
@@ -368,6 +372,9 @@ export default function ScanPage() {
                     >
                       <PlayCircle className="size-[18px]" /> {t.scan.watchVideo}
                     </a>
+                    {scanId && (
+                      <StarRating scanId={scanId} dishIndex={i} dishTitle={d.title_vi} />
+                    )}
                   </div>
                 )}
               </div>
