@@ -7,7 +7,13 @@ import { useLang, useT, type Lang } from "@/components/landing/i18n";
 const LANGS: Lang[] = ["vi", "en"];
 
 /** Reusable vi/en dropdown — backed by the app-wide LangProvider. */
-export function LangSwitcher({ className = "" }: { className?: string }) {
+export function LangSwitcher({
+  className = "",
+  direction = "down",
+}: {
+  className?: string;
+  direction?: "up" | "down";
+}) {
   const { lang, setLang } = useLang();
   const t = useT();
   const [open, setOpen] = useState(false);
@@ -33,7 +39,11 @@ export function LangSwitcher({ className = "" }: { className?: string }) {
         <span className="uppercase">{lang}</span>
       </button>
       {open && (
-        <div className="absolute right-0 z-50 mt-2 w-40 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-float">
+        <div
+          className={`absolute right-0 z-50 w-40 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-float ${
+            direction === "up" ? "bottom-full mb-2" : "mt-2"
+          }`}
+        >
           {LANGS.map((l) => (
             <button
               key={l}
