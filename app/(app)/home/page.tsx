@@ -1,10 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Camera, Clock, CreditCard } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { SignOutButton } from "@/components/sign-out-button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Camera, Clock, CreditCard } from "lucide-react";
+import { getLocale } from "@/lib/i18n/server";
+import { STR } from "@/lib/i18n/strings";
 
 export const dynamic = "force-dynamic";
 
@@ -15,6 +15,9 @@ export default async function HomePage() {
   // Deduped with the (app) layout's nav via React cache() — one auth round-trip.
   const user = await getCurrentUser();
   if (!user) redirect("/login");
+
+  const locale = await getLocale();
+  const t = STR[locale].home;
 
   const supabase = await createClient();
   // The two reads are independent — run them in parallel instead of serially.
@@ -36,73 +39,71 @@ export default async function HomePage() {
   const tier = q?.tier ?? "free";
   const remainingPct = limit > 0 ? Math.max(0, Math.round((remaining / limit) * 100)) : 0;
   const recent = (rData ?? []) as unknown as RecentScan[];
+  const dateLocale = locale === "en" ? "en-US" : "vi-VN";
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-5 p-4">
-      {/* header */}
-      <header className="flex items-center justify-between pt-1">
-        <div className="flex items-center gap-3">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.jpg" alt="" className="h-11 w-11 rounded-2xl" />
-          <div className="min-w-0">
-            <p className="text-xs text-muted-foreground">Xin chào 👋</p>
-            <p className="truncate text-sm font-semibold">{user.email}</p>
-          </div>
-        </div>
-        <SignOutButton />
-      </header>
+      {/* greeting */}
+      <div className="pt-1">
+        <p className="text-sm text-muted-foreground">{t.greeting}</p>
+        <p className="truncate text-lg font-bold tracking-tight">{user.email}</p>
+      </div>
 
       {/* quota hero */}
-      <Card className="overflow-hidden border-0 bg-gradient-to-br from-[#2ba3d9] to-[#1b7aa8] text-white shadow-lg">
-        <CardContent className="flex flex-col gap-3 p-5">
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-white/80">Lượt quét hôm nay</span>
-            <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold uppercase">
-              {tier}
-            </span>
-          </div>
-          <p className="text-4xl font-extrabold leading-none">
-            {remaining}
-            <span className="text-xl font-medium text-white/70"> / {limit}</span>
-          </p>
-          <div className="h-2 w-full overflow-hidden rounded-full bg-white/25">
-            <div className="h-full rounded-full bg-white" style={{ width: `${remainingPct}%` }} />
-          </div>
-          <p className="text-xs text-white/70">{used} đã dùng · reset lúc nửa đêm</p>
-        </CardContent>
-      </Card>
+      <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-primary to-[#176f9c] p-5 text-white shadow-float">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-white/80">{t.quotaToday}</span>
+          <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold uppercase">
+            {tier}
+          </span>
+        </div>
+        <p className="mt-3 text-5xl font-extrabold leading-none">
+          {remaining}
+          <span className="text-xl font-medium text-white/70"> / {limit}</span>
+        </p>
+        <div className="mt-4 h-2 w-full overflow-hidden rounded-full bg-white/25">
+          <div className="h-full rounded-full bg-white" style={{ width: `${remainingPct}%` }} />
+        </div>
+        <p className="mt-2 text-xs text-white/70">
+          {used} {t.usedSuffix}
+        </p>
+      </div>
 
       {/* big scan CTA */}
       <Link
         href="/scan"
-        className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-primary-foreground shadow-sm transition hover:opacity-90 active:translate-y-px"
+        className="flex items-center justify-center gap-2 rounded-2xl bg-primary px-6 py-4 text-base font-semibold text-primary-foreground shadow-float transition hover:opacity-95 active:translate-y-px"
       >
-        <Camera className="size-5" /> Chụp tủ lạnh
+        <Camera className="size-5" /> {t.scanCta}
       </Link>
 
       {/* quick actions */}
       <div className="grid grid-cols-2 gap-3">
-        <Link href="/history" className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-sm">
+        <Link
+          href="/history"
+          className="flex flex-col gap-2 rounded-2xl bg-card p-4 shadow-card ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-float"
+        >
           <Clock className="size-5 text-primary" />
-          <span className="text-sm font-semibold">Lịch sử</span>
-          <span className="text-xs text-muted-foreground">Xem món đã gợi</span>
+          <span className="text-sm font-semibold">{t.historyTitle}</span>
+          <span className="text-xs text-muted-foreground">{t.historySub}</span>
         </Link>
-        <Link href="/upgrade" className="flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 transition-shadow hover:shadow-sm">
+        <Link
+          href="/upgrade"
+          className="flex flex-col gap-2 rounded-2xl bg-card p-4 shadow-card ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-float"
+        >
           <CreditCard className="size-5 text-primary" />
-          <span className="text-sm font-semibold">Các gói</span>
-          <span className="text-xs text-muted-foreground">Quét nhiều hơn</span>
+          <span className="text-sm font-semibold">{t.plansTitle}</span>
+          <span className="text-xs text-muted-foreground">{t.plansSub}</span>
         </Link>
       </div>
 
       {/* recent */}
       <section className="flex flex-col gap-2">
-        <p className="text-sm font-semibold">Gần đây</p>
+        <p className="text-sm font-semibold">{t.recent}</p>
         {recent.length === 0 ? (
-          <Card>
-            <CardContent className="py-6 text-center text-sm text-muted-foreground">
-              Chưa có lần quét nào — bấm <b>Chụp tủ lạnh</b> để bắt đầu!
-            </CardContent>
-          </Card>
+          <div className="rounded-2xl bg-card p-6 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+            {t.empty}
+          </div>
         ) : (
           recent.map((s) => {
             const titles = (s.suggestions?.[0]?.dishes ?? [])
@@ -113,11 +114,11 @@ export default async function HomePage() {
               <Link
                 key={s.id}
                 href="/history"
-                className="rounded-xl border border-border bg-card p-3 transition-shadow hover:shadow-sm"
+                className="rounded-xl bg-card p-3 shadow-card ring-1 ring-border/60 transition hover:shadow-float"
               >
-                <p className="line-clamp-1 text-sm font-medium">{titles || "Không có món"}</p>
+                <p className="line-clamp-1 text-sm font-medium">{titles || t.noDish}</p>
                 <p className="text-xs text-muted-foreground">
-                  {new Date(s.created_at).toLocaleString("vi-VN")}
+                  {new Date(s.created_at).toLocaleString(dateLocale)}
                 </p>
               </Link>
             );

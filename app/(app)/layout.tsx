@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import { getCurrentUser, getIsAdmin } from "@/lib/auth";
+import { AppHeader } from "@/components/app-header";
 import { BottomNav } from "@/components/bottom-nav";
 
 /**
@@ -18,6 +19,7 @@ export default function AppLayout({
 }) {
   return (
     <div className="flex min-h-full flex-1 flex-col">
+      <AppHeader />
       <div className="flex flex-1 flex-col pb-20">{children}</div>
       <Suspense fallback={<NavFallback />}>
         <AppNav />
