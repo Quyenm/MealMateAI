@@ -19,6 +19,7 @@ export type Ingredient = {
   expiring?: boolean;
 };
 
+export type Macros = { kcal: number; protein_g: number; carbs_g: number; fat_g: number };
 export type Dish = {
   title_vi: string;
   title_en: string;
@@ -28,6 +29,7 @@ export type Dish = {
   missing_ingredients: string[];
   why: string;
   steps: string[];
+  approx_macros: Macros;
 };
 
 const VISION_SYSTEM =
@@ -38,9 +40,10 @@ const VISION_SYSTEM =
 
 const RECIPE_SYSTEM =
   "Bạn là công cụ gợi món ăn gia đình Việt Nam. Bạn nhận một JSON pantry (các nguyên liệu user ĐÃ xác nhận, mỗi món có thể có expiring:true) và prefs tùy chọn. " +
-  "QUY TẮC: (1) chỉ gợi món Việt đời thường nấu được NGAY; (2) CHỈ dùng nguyên liệu trong pantry; ngoại lệ tối đa 2 gia vị cơ bản (muối, dầu ăn, nước mắm, đường, tiêu, nước) — phải liệt kê chúng vào missing_ingredients; TUYỆT ĐỐI không bịa món cần nguyên liệu không có trong pantry; " +
-  "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả TỐI ĐA 3 món, xếp món dùng đồ sắp hỏng lên đầu; (5) steps là các bước nấu ngắn gọn bằng tiếng Việt; (6) nếu KHÔNG có món Việt nào nấu được thì trả mảng dishes rỗng (không bịa); " +
-  "(7) prefs (nếu có): TUYỆT ĐỐI không gợi món chứa thứ trong allergies hoặc never_suggest; cố gắng hợp dietary_pref (none|keto|eat_clean|muscle_gain), spice_pref (mild|medium|hot) và cook_time_pref (5min|15min|30min_plus — ưu tiên món nấu trong khoảng thời gian đó).";
+  "QUY TẮC: (1) chỉ gợi món Việt đời thường; (2) ưu tiên món nấu được NGAY chỉ dùng pantry + tối đa 2 gia vị cơ bản (muối, dầu ăn, nước mắm, đường, tiêu, nước) — liệt kê gia vị vào missing_ingredients. NGOÀI RA được phép thêm tối đa 2 món 'gần nấu được' chỉ thiếu ĐÚNG 1 nguyên liệu thường gặp (cũng ghi vào missing_ingredients); KHÔNG món nào thiếu quá 1 thứ ngoài gia vị; " +
+  "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả TỐI ĐA 5 món, xếp món nấu-ngay (không thiếu gì ngoài gia vị) lên trước, món gần-nấu-được xuống sau; (5) steps là các bước nấu ngắn gọn bằng tiếng Việt; (6) nếu KHÔNG có món Việt nào hợp lý thì trả mảng dishes rỗng (không bịa); " +
+  "(7) prefs (nếu có): TUYỆT ĐỐI không gợi món chứa thứ trong allergies hoặc never_suggest; cố gắng hợp dietary_pref (none|keto|eat_clean|muscle_gain), spice_pref (mild|medium|hot) và cook_time_pref (5min|15min|30min_plus — ưu tiên món nấu trong khoảng thời gian đó); " +
+  "(8) approx_macros: ước lượng dinh dưỡng THÔ cho MỘT phần ăn (kcal, protein_g, carbs_g, fat_g — số nguyên), không cần chính xác tuyệt đối.";
 
 const INGREDIENTS_SCHEMA = {
   type: "object",
@@ -83,6 +86,7 @@ const DISHES_SCHEMA = {
           "missing_ingredients",
           "why",
           "steps",
+          "approx_macros",
         ],
         properties: {
           title_vi: { type: "string" },
@@ -93,6 +97,17 @@ const DISHES_SCHEMA = {
           missing_ingredients: { type: "array", items: { type: "string" } },
           why: { type: "string" },
           steps: { type: "array", items: { type: "string" } },
+          approx_macros: {
+            type: "object",
+            additionalProperties: false,
+            required: ["kcal", "protein_g", "carbs_g", "fat_g"],
+            properties: {
+              kcal: { type: "integer" },
+              protein_g: { type: "integer" },
+              carbs_g: { type: "integer" },
+              fat_g: { type: "integer" },
+            },
+          },
         },
       },
     },
@@ -151,6 +166,6 @@ export async function suggestDishes(
     },
   });
   const parsed = parseJsonContent(res) as { dishes?: Dish[] };
-  const dishes = ((parsed.dishes ?? []) as Dish[]).slice(0, 3);
+  const dishes = ((parsed.dishes ?? []) as Dish[]).slice(0, 5);
   return { dishes, cost: costOf(res.usage) };
 }

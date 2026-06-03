@@ -85,14 +85,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "quota_exceeded" }, { status: 402 });
   }
 
-  // Drop dishes needing a non-staple ingredient the user doesn't have.
-  const cookable = result.dishes.filter(
-    (d) => (d.missing_ingredients ?? []).filter((m) => !isStaple(m)).length === 0,
-  );
-  const dishes = (cookable.length ? cookable : result.dishes).slice(
-    0,
-    quota?.suggestions_per_scan ?? 3,
-  );
+  // Rank cookable-now first (nothing missing beyond staples), then near-cookable
+  // (missing ~1 common item) so a sparse fridge still gets options. The near ones
+  // keep their missing_ingredients so the UI can show "also needs X".
+  const nonStapleMissing = (d: (typeof result.dishes)[number]) =>
+    (d.missing_ingredients ?? []).filter((m) => !isStaple(m)).length;
+  const ranked = [...result.dishes].sort((a, b) => nonStapleMissing(a) - nonStapleMissing(b));
+  const dishes = ranked
+    .slice(0, (quota?.suggestions_per_scan ?? 3) + 2)
+    .map((d) => ({ ...d, cookable_now: nonStapleMissing(d) === 0 }));
 
   // Persist (text only — never the photo).
   const admin = createAdminClient();

@@ -24,6 +24,7 @@ type Ingredient = {
   expiring?: boolean;
   amount?: "low" | "medium" | "high";
 };
+type Macros = { kcal: number; protein_g: number; carbs_g: number; fat_g: number };
 type Dish = {
   title_vi: string;
   title_en: string;
@@ -33,6 +34,8 @@ type Dish = {
   missing_ingredients: string[];
   why: string;
   steps: string[];
+  approx_macros?: Macros;
+  cookable_now?: boolean;
 };
 type Step = "capture" | "recognizing" | "confirm" | "suggesting" | "results";
 
@@ -318,7 +321,14 @@ export default function ScanPage() {
                   className="flex w-full flex-col gap-1.5 p-4 text-left"
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <span className="font-bold tracking-tight">{d.title_vi}</span>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-bold tracking-tight">{d.title_vi}</span>
+                      {d.cookable_now === false && (
+                        <span className="rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e]">
+                          {t.scan.almostBadge}
+                        </span>
+                      )}
+                    </div>
                     <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warm-50 px-2 py-0.5 text-xs font-medium text-[#b85a2e]">
                       <Clock className="size-3" />
                       {d.cook_time_min}′ · {diffLabel(d.difficulty)}
@@ -331,6 +341,13 @@ export default function ScanPage() {
                     {d.missing_ingredients?.length > 0 && (
                       <p className="text-xs text-muted-foreground">
                         {t.scan.needMore}: {d.missing_ingredients.join(", ")}
+                      </p>
+                    )}
+                    {d.approx_macros && (
+                      <p className="text-xs text-muted-foreground">
+                        ≈ {d.approx_macros.kcal} {t.scan.kcalUnit} · {d.approx_macros.protein_g}g{" "}
+                        {t.scan.macroProtein} · {d.approx_macros.carbs_g}g {t.scan.macroCarbs} ·{" "}
+                        {d.approx_macros.fat_g}g {t.scan.macroFat}
                       </p>
                     )}
                     <ol className="flex flex-col gap-2">

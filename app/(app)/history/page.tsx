@@ -8,7 +8,15 @@ import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
-type Dish = { title_vi: string; cook_time_min: number; why?: string; steps?: string[] };
+type Macros = { kcal: number; protein_g: number; carbs_g: number; fat_g: number };
+type Dish = {
+  title_vi: string;
+  cook_time_min: number;
+  why?: string;
+  steps?: string[];
+  approx_macros?: Macros;
+  cookable_now?: boolean;
+};
 type Scan = {
   id: string;
   created_at: string;
@@ -24,7 +32,8 @@ export default async function HistoryPage() {
   if (!user) redirect("/login");
 
   const locale = await getLocale();
-  const t = STR[locale].history;
+  const s = STR[locale];
+  const t = s.history;
   const dateLocale = locale === "en" ? "en-US" : "vi-VN";
 
   const { data } = await supabase
@@ -78,6 +87,13 @@ export default async function HistoryPage() {
                     <ChevronDown className="size-4 shrink-0 text-muted-foreground transition group-open:rotate-180" />
                   </summary>
                   {d.why && <p className="mt-2 text-xs text-muted-foreground">{d.why}</p>}
+                  {d.approx_macros && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      ≈ {d.approx_macros.kcal} {s.scan.kcalUnit} · {d.approx_macros.protein_g}g{" "}
+                      {s.scan.macroProtein} · {d.approx_macros.carbs_g}g {s.scan.macroCarbs} ·{" "}
+                      {d.approx_macros.fat_g}g {s.scan.macroFat}
+                    </p>
+                  )}
                   {d.steps && d.steps.length > 0 && (
                     <ol className="mt-2 flex flex-col gap-1.5">
                       {d.steps.map((st, j) => (
