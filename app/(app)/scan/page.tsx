@@ -14,6 +14,7 @@ import {
   Loader2,
   ChevronLeft,
   ChefHat,
+  Refrigerator,
 } from "lucide-react";
 import { useT, useLang } from "@/components/landing/i18n";
 import { StarRating } from "@/components/star-rating";
@@ -185,6 +186,41 @@ export default function ScanPage() {
     }
   }
 
+  async function saveToFridge() {
+    if (!ingredients.length) return;
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          items: ingredients.map((g) => ({ name: g.name_vi, name_en: g.name_en, amount: g.amount })),
+        }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      toast.success(t.fridge.savedToast);
+    } catch {
+      toast.error(t.scan.toast.netErr);
+    }
+  }
+
+  async function deductFromFridge(names: string[]) {
+    if (!names.length) return;
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deduct", names }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        if (d.removed > 0) toast.success(t.fridge.deductedToast);
+      }
+    } catch {
+      /* non-blocking */
+    }
+  }
+
   async function addToShopping(names: string[]) {
     if (!names.length) return;
     try {
@@ -341,6 +377,11 @@ export default function ScanPage() {
           <Button className="shadow-float" onClick={getSuggestions}>
             {t.scan.suggest} ({ingredients.length})
           </Button>
+          {ingredients.length > 0 && (
+            <Button variant="outline" onClick={saveToFridge} className="gap-1.5">
+              <Refrigerator className="size-4" /> {t.fridge.saveFromScan}
+            </Button>
+          )}
         </div>
       )}
 
@@ -503,6 +544,7 @@ export default function ScanPage() {
               steps={dishSteps(selected)}
               defaultMin={selected.cook_time_min}
               onClose={() => setCooking(false)}
+              onFinish={() => deductFromFridge(selected.uses_ingredients ?? [])}
             />
           )}
         </div>

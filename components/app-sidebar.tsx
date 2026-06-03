@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import {
   Home,
   Camera,
+  Refrigerator,
   Clock,
   Heart,
   ShoppingCart,
@@ -20,6 +21,7 @@ import { SignOutButton } from "@/components/sign-out-button";
 type NavKey =
   | "home"
   | "scan"
+  | "fridge"
   | "history"
   | "favorites"
   | "shopping"
@@ -29,8 +31,9 @@ type NavKey =
 const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
   { href: "/home", key: "home", Icon: Home },
   { href: "/scan", key: "scan", Icon: Camera },
-  { href: "/history", key: "history", Icon: Clock },
+  { href: "/fridge", key: "fridge", Icon: Refrigerator },
   { href: "/favorites", key: "favorites", Icon: Heart },
+  { href: "/history", key: "history", Icon: Clock },
   { href: "/shopping", key: "shopping", Icon: ShoppingCart },
   { href: "/upgrade", key: "plans", Icon: CreditCard },
   { href: "/settings", key: "settings", Icon: Settings },

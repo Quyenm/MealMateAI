@@ -15,11 +15,13 @@ export function CookMode({
   steps,
   defaultMin = 5,
   onClose,
+  onFinish,
 }: {
   title: string;
   steps: string[];
   defaultMin?: number;
   onClose: () => void;
+  onFinish?: () => void;
 }) {
   const t = useT();
   const [step, setStep] = useState(0);
@@ -113,7 +115,13 @@ export function CookMode({
             {t.cook.next} <ChevronRight className="size-4" />
           </Button>
         ) : (
-          <Button onClick={onClose} className="gap-1 shadow-float">
+          <Button
+            onClick={() => {
+              onFinish?.();
+              onClose();
+            }}
+            className="gap-1 shadow-float"
+          >
             <Check className="size-4" /> {t.cook.done}
           </Button>
         )}

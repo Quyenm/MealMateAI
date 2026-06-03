@@ -20,6 +20,7 @@ type Dish = {
   why?: string;
   steps?: string[];
   approx_macros?: Macros;
+  uses_ingredients?: string[];
   image?: { url: string; credit_url: string };
 };
 export type SavedDish = { id: string; scan_id: string | null; dish_index: number; dish: Dish };
@@ -41,6 +42,23 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
   const dSteps = (d: Dish) => (en ? d.steps_en || d.steps_vi || d.steps : d.steps_vi || d.steps) || [];
   const diff = (d: Dish) =>
     d.difficulty === "easy" ? t.scan.diffEasy : d.difficulty === "hard" ? t.scan.diffHard : t.scan.diffMedium;
+
+  async function deduct(names: string[]) {
+    if (!names.length) return;
+    try {
+      const res = await fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deduct", names }),
+      });
+      if (res.ok) {
+        const d = await res.json();
+        if (d.removed > 0) toast.success(t.fridge.deductedToast);
+      }
+    } catch {
+      /* non-blocking */
+    }
+  }
 
   async function remove(s: SavedDish) {
     setItems((xs) => xs.filter((x) => x.id !== s.id));
@@ -148,6 +166,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
           steps={dSteps(cookDish)}
           defaultMin={cookDish.cook_time_min}
           onClose={() => setCookDish(null)}
+          onFinish={() => deduct(cookDish.uses_ingredients ?? [])}
         />
       )}
     </>
