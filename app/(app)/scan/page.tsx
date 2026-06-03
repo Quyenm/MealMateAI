@@ -13,10 +13,12 @@ import {
   RefreshCw,
   Loader2,
   ChevronLeft,
+  ChefHat,
 } from "lucide-react";
 import { useT, useLang } from "@/components/landing/i18n";
 import { StarRating } from "@/components/star-rating";
 import { SaveDishButton } from "@/components/save-dish-button";
+import { CookMode } from "@/components/cook-mode";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -78,6 +80,7 @@ export default function ScanPage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [selectedDish, setSelectedDish] = useState<number | null>(null);
   const [scanId, setScanId] = useState<string | null>(null);
+  const [cooking, setCooking] = useState(false);
 
   const amountLabel = (a?: Ingredient["amount"]) =>
     a === "low" ? t.scan.amountLow : a === "medium" ? t.scan.amountMedium : a === "high" ? t.scan.amountHigh : null;
@@ -190,6 +193,7 @@ export default function ScanPage() {
     setDishes([]);
     setScanId(null);
     setSelectedDish(null);
+    setCooking(false);
   }
 
   return (
@@ -383,7 +387,10 @@ export default function ScanPage() {
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-3">
           <button
             type="button"
-            onClick={() => setSelectedDish(null)}
+            onClick={() => {
+              setCooking(false);
+              setSelectedDish(null);
+            }}
             className="flex w-fit items-center gap-1 text-sm font-medium text-muted-foreground transition hover:text-foreground"
           >
             <ChevronLeft className="size-4" /> {t.scan.backToList}
@@ -433,6 +440,11 @@ export default function ScanPage() {
                   {selected.approx_macros.fat_g}g {t.scan.macroFat}
                 </p>
               )}
+              {dishSteps(selected).length > 0 && (
+                <Button onClick={() => setCooking(true)} className="shadow-float">
+                  <ChefHat className="size-4" /> {t.cook.start}
+                </Button>
+              )}
               <ol className="flex flex-col gap-2">
                 {dishSteps(selected).map((s, j) => (
                   <li key={j} className="flex gap-2.5 text-sm">
@@ -461,6 +473,14 @@ export default function ScanPage() {
               )}
             </div>
           </div>
+          {cooking && (
+            <CookMode
+              title={dishTitle(selected)}
+              steps={dishSteps(selected)}
+              defaultMin={selected.cook_time_min}
+              onClose={() => setCooking(false)}
+            />
+          )}
         </div>
       )}
     </main>

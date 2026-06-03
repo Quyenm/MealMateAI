@@ -1,9 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Clock, PlayCircle, Heart, ChevronDown } from "lucide-react";
+import { Clock, PlayCircle, Heart, ChevronDown, ChefHat } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useLang } from "@/components/landing/i18n";
+import { CookMode } from "@/components/cook-mode";
+import { Button } from "@/components/ui/button";
 
 type Macros = { kcal: number; protein_g: number; carbs_g: number; fat_g: number };
 type Dish = {
@@ -32,6 +34,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
   const en = lang === "en";
   const [items, setItems] = useState(initial);
   const [open, setOpen] = useState<string | null>(initial[0]?.id ?? null);
+  const [cookDish, setCookDish] = useState<Dish | null>(null);
 
   const dTitle = (d: Dish) => (en && d.title_en ? d.title_en : d.title_vi);
   const dWhy = (d: Dish) => (en ? d.why_en || d.why_vi || d.why : d.why_vi || d.why) || "";
@@ -62,6 +65,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
   }
 
   return (
+    <>
     <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
       {items.map((s) => {
         const d = s.dish;
@@ -108,6 +112,11 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
               </button>
               {isOpen && (
                 <>
+                  {dSteps(d).length > 0 && (
+                    <Button onClick={() => setCookDish(d)} className="shadow-float">
+                      <ChefHat className="size-4" /> {t.cook.start}
+                    </Button>
+                  )}
                   <ol className="flex flex-col gap-2">
                     {dSteps(d).map((st, j) => (
                       <li key={j} className="flex gap-2.5 text-sm">
@@ -133,5 +142,14 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
         );
       })}
     </div>
+      {cookDish && (
+        <CookMode
+          title={dTitle(cookDish)}
+          steps={dSteps(cookDish)}
+          defaultMin={cookDish.cook_time_min}
+          onClose={() => setCookDish(null)}
+        />
+      )}
+    </>
   );
 }
