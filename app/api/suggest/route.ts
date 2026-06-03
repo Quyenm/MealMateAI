@@ -96,7 +96,7 @@ export async function POST(req: Request) {
   // in the row below). Fails open to no-image if PEXELS_API_KEY is unset.
   const dishes = await Promise.all(
     ranked
-      .slice(0, (quota?.suggestions_per_scan ?? 3) + 2)
+      .slice(0, (quota?.suggestions_per_scan ?? 3) + 4)
       .map(async (d) => ({
         ...d,
         cookable_now: nonStapleMissing(d) === 0,
