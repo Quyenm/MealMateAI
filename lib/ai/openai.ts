@@ -15,6 +15,7 @@ export type Ingredient = {
   name_vi: string;
   name_en: string;
   confidence: number;
+  amount?: "low" | "medium" | "high";
   expiring?: boolean;
 };
 
@@ -32,7 +33,8 @@ export type Dish = {
 const VISION_SYSTEM =
   "Bạn là trợ lý nhận diện nguyên liệu cho app nấu ăn Việt Nam. Nhìn ảnh tủ lạnh/bếp và liệt kê MỌI nguyên liệu thực phẩm ăn được nhìn thấy (rau củ, thịt cá, trứng, gia vị, đồ khô). " +
   "Quy tắc: (1) chỉ liệt kê thứ thực sự nhìn thấy, không đoán thứ không có; (2) mỗi món cho name_vi (tên tiếng Việt thông dụng) và name_en; (3) confidence là độ chắc chắn 0..1; " +
-  "(4) bỏ qua đồ không ăn được, bao bì, chữ/logo; gộp các món trùng lặp; (5) nếu ảnh không đọc được hoặc không có thực phẩm, trả mảng rỗng.";
+  "(4) bỏ qua đồ không ăn được, bao bì, chữ/logo; gộp các món trùng lặp; (5) nếu ảnh không đọc được hoặc không có thực phẩm, trả mảng rỗng; " +
+  "(6) amount là ước lượng số lượng THÔ nhìn thấy: 'low' (ít, một chút), 'medium' (vừa đủ một bữa), 'high' (nhiều, dư). TUYỆT ĐỐI không đoán số gram cụ thể — chỉ 3 mức này.";
 
 const RECIPE_SYSTEM =
   "Bạn là công cụ gợi món ăn gia đình Việt Nam. Bạn nhận một JSON pantry (các nguyên liệu user ĐÃ xác nhận, mỗi món có thể có expiring:true) và prefs tùy chọn. " +
@@ -49,11 +51,12 @@ const INGREDIENTS_SCHEMA = {
       items: {
         type: "object",
         additionalProperties: false,
-        required: ["name_vi", "name_en", "confidence"],
+        required: ["name_vi", "name_en", "confidence", "amount"],
         properties: {
           name_vi: { type: "string" },
           name_en: { type: "string" },
           confidence: { type: "number" },
+          amount: { type: "string", enum: ["low", "medium", "high"] },
         },
       },
     },
