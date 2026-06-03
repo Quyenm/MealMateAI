@@ -13,7 +13,7 @@ export async function fetchDishImage(query: string): Promise<DishImage | null> {
   try {
     const res = await fetch(
       `https://api.pexels.com/v1/search?query=${encodeURIComponent(
-        query + " food dish",
+        query + " vietnamese food",
       )}&per_page=1&orientation=landscape`,
       { headers: { Authorization: PEXELS_KEY }, signal: AbortSignal.timeout(4000) },
     );

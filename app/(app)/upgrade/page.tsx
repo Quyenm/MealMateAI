@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Check, Sparkles } from "lucide-react";
+import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
 import { STR } from "@/lib/i18n/strings";
@@ -19,11 +20,9 @@ type Tier = {
 };
 
 export default async function UpgradePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
+  const supabase = await createClient();
 
   const locale = await getLocale();
   const s = STR[locale];

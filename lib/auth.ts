@@ -1,23 +1,35 @@
 import { cache } from "react";
-import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 
+export type SessionUser = { id: string; email: string };
+
 /**
- * Current request's user, deduped with React `cache()`.
+ * Current request's user, deduped per request with React `cache()`.
  *
- * Without this, the (app) layout's nav AND each page would every nav pay a
- * separate Supabase auth round-trip. `cache()` memoizes for the lifetime of a
- * single server request, so layout + page share ONE call.
- *
- * NOTE: this does not replace the proxy's getUser() — the proxy still refreshes
- * the session cookie and guards routes on every request (a different context).
+ * Uses getClaims() (verifies the JWT locally when the project has asymmetric
+ * signing keys → no network round-trip) instead of getUser(). The proxy still
+ * calls getUser() on every request, which refreshes the session cookie, so by
+ * the time a page renders the access token is already fresh — getClaims just
+ * reads it. Falls back to getUser() if claims are unavailable, so it's never
+ * less correct than before, just faster on the happy path.
  */
-export const getCurrentUser = cache(async (): Promise<User | null> => {
+export const getCurrentUser = cache(async (): Promise<SessionUser | null> => {
   const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase.auth.getClaims();
+    const claims = data?.claims as { sub?: string; email?: string } | undefined;
+    if (!error && claims?.sub) {
+      return { id: claims.sub, email: claims.email ?? "" };
+    }
+  } catch {
+    // fall through to getUser()
+  }
+
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  return user;
+  return user ? { id: user.id, email: user.email ?? "" } : null;
 });
 
 /** Whether the current request's user is an admin (deduped per request). */
