@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Settings } from "lucide-react";
 import { LangSwitcher } from "@/components/lang-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 
@@ -20,6 +21,13 @@ export function AppHeader() {
           <span className="font-bold tracking-tight">MealMate</span>
         </Link>
         <div className="flex items-center gap-1.5">
+          <Link
+            href="/settings"
+            aria-label="Settings"
+            className="flex size-9 items-center justify-center rounded-md text-muted-foreground transition hover:text-foreground"
+          >
+            <Settings className="size-[18px]" />
+          </Link>
           <LangSwitcher />
           <SignOutButton />
         </div>

@@ -54,6 +54,13 @@ export async function POST(req: Request) {
   }
   const ingredients = parsed.data.ingredients as Ingredient[];
 
+  // Personalize from the user's saved taste (read server-side, not client-trusted).
+  const { data: prefs } = await supabase
+    .from("profiles")
+    .select("dietary_pref, cook_time_pref, spice_pref, allergies, never_suggest")
+    .eq("id", user.id)
+    .single();
+
   // Quota pre-check (no token spend if already at the limit).
   const quota = await getQuota(user.id);
   if (quota && quota.remaining <= 0) {
@@ -65,7 +72,7 @@ export async function POST(req: Request) {
 
   let result;
   try {
-    result = await suggestDishes(ingredients, parsed.data.prefs);
+    result = await suggestDishes(ingredients, prefs ?? parsed.data.prefs);
     await recordSpend(result.cost);
   } catch (e) {
     console.error("/api/suggest failed", e);

@@ -39,7 +39,8 @@ const VISION_SYSTEM =
 const RECIPE_SYSTEM =
   "Bạn là công cụ gợi món ăn gia đình Việt Nam. Bạn nhận một JSON pantry (các nguyên liệu user ĐÃ xác nhận, mỗi món có thể có expiring:true) và prefs tùy chọn. " +
   "QUY TẮC: (1) chỉ gợi món Việt đời thường nấu được NGAY; (2) CHỈ dùng nguyên liệu trong pantry; ngoại lệ tối đa 2 gia vị cơ bản (muối, dầu ăn, nước mắm, đường, tiêu, nước) — phải liệt kê chúng vào missing_ingredients; TUYỆT ĐỐI không bịa món cần nguyên liệu không có trong pantry; " +
-  "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả TỐI ĐA 3 món, xếp món dùng đồ sắp hỏng lên đầu; (5) steps là các bước nấu ngắn gọn bằng tiếng Việt; (6) nếu KHÔNG có món Việt nào nấu được thì trả mảng dishes rỗng (không bịa).";
+  "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả TỐI ĐA 3 món, xếp món dùng đồ sắp hỏng lên đầu; (5) steps là các bước nấu ngắn gọn bằng tiếng Việt; (6) nếu KHÔNG có món Việt nào nấu được thì trả mảng dishes rỗng (không bịa); " +
+  "(7) prefs (nếu có): TUYỆT ĐỐI không gợi món chứa thứ trong allergies hoặc never_suggest; cố gắng hợp dietary_pref (none|keto|eat_clean|muscle_gain), spice_pref (mild|medium|hot) và cook_time_pref (5min|15min|30min_plus — ưu tiên món nấu trong khoảng thời gian đó).";
 
 const INGREDIENTS_SCHEMA = {
   type: "object",
