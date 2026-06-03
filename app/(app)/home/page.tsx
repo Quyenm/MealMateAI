@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { SignOutButton } from "@/components/sign-out-button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,27 +12,29 @@ type Quota = { tier: string; used: number; scan_limit: number; remaining: number
 type RecentScan = { id: string; created_at: string; suggestions: { dishes: { title_vi: string }[] }[] };
 
 export default async function HomePage() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Deduped with the (app) layout's nav via React cache() — one auth round-trip.
+  const user = await getCurrentUser();
   if (!user) redirect("/login");
 
-  const { data: qData } = await supabase.rpc("get_quota_status", { p_user: user.id });
+  const supabase = await createClient();
+  // The two reads are independent — run them in parallel instead of serially.
+  const [{ data: qData }, { data: rData }] = await Promise.all([
+    supabase.rpc("get_quota_status", { p_user: user.id }),
+    supabase
+      .from("scans")
+      .select("id, created_at, suggestions(dishes)")
+      .eq("user_id", user.id)
+      .eq("status", "suggested")
+      .order("created_at", { ascending: false })
+      .limit(3),
+  ]);
+
   const q = (Array.isArray(qData) ? qData[0] : qData) as Quota | null;
   const used = q?.used ?? 0;
   const limit = q?.scan_limit ?? 3;
   const remaining = q?.remaining ?? Math.max(limit - used, 0);
   const tier = q?.tier ?? "free";
   const remainingPct = limit > 0 ? Math.max(0, Math.round((remaining / limit) * 100)) : 0;
-
-  const { data: rData } = await supabase
-    .from("scans")
-    .select("id, created_at, suggestions(dishes)")
-    .eq("user_id", user.id)
-    .eq("status", "suggested")
-    .order("created_at", { ascending: false })
-    .limit(3);
   const recent = (rData ?? []) as unknown as RecentScan[];
 
   return (

@@ -1,17 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
 import type { User } from "@supabase/supabase-js";
+import { getCurrentUser, getIsAdmin } from "@/lib/auth";
 
-/** Returns the current user only if they are an admin, else null. */
+/**
+ * Returns the current user only if they are an admin, else null.
+ * Uses the request-cached helpers so the /admin page and the (app) layout's
+ * nav share the same getUser()/profiles round-trips.
+ */
 export async function getAdminUser(): Promise<User | null> {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getCurrentUser();
   if (!user) return null;
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_admin")
-    .eq("id", user.id)
-    .single();
-  return profile?.is_admin ? user : null;
+  return (await getIsAdmin()) ? user : null;
 }
