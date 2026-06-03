@@ -1,10 +1,12 @@
-import type { ReactNode } from "react";
-import { UtensilsCrossed } from "lucide-react";
+"use client";
+
+import { useState, type ReactNode } from "react";
+import { UtensilsCrossed, ExternalLink } from "lucide-react";
 
 /**
- * A dish header image. Shows the real photo when we have one (Wikipedia), and a
- * branded gradient placeholder otherwise — never an unrelated stock photo, so
- * the picture always matches the dish (or is honestly absent).
+ * A dish header image. Shows the real photo when we have one and it loads; on a
+ * load error (e.g. a hotlinked source went away) or no image it falls back to a
+ * branded gradient placeholder — never a broken-image icon or a wrong photo.
  */
 export function DishCover({
   image,
@@ -19,20 +21,29 @@ export function DishCover({
   iconClassName?: string;
   children?: ReactNode;
 }) {
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const showImg = !!image?.url && failedUrl !== image.url;
+
   return (
     <div className={`relative w-full overflow-hidden bg-muted ${className}`}>
-      {image?.url ? (
+      {showImg ? (
         <>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={image.url} alt="" className="h-full w-full object-cover" />
-          {credit && (
+          <img
+            src={image!.url}
+            alt=""
+            className="h-full w-full object-cover"
+            onError={() => setFailedUrl(image!.url)}
+          />
+          {credit && image!.credit_url && (
             <a
-              href={image.credit_url}
+              href={image!.credit_url}
               target="_blank"
               rel="noopener noreferrer"
-              className="absolute bottom-1.5 right-1.5 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
+              aria-label="source"
+              className="absolute bottom-1.5 right-1.5 rounded bg-black/45 p-1 text-white/90 backdrop-blur-sm"
             >
-              Wikipedia
+              <ExternalLink className="size-3" />
             </a>
           )}
         </>

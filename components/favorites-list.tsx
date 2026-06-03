@@ -22,7 +22,7 @@ type Dish = {
   steps?: string[];
   approx_macros?: Macros;
   uses_ingredients?: string[];
-  image?: { url: string; credit_url: string };
+  image?: { url: string; credit_url?: string };
 };
 export type SavedDish = { id: string; scan_id: string | null; dish_index: number; dish: Dish };
 

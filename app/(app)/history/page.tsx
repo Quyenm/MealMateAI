@@ -24,7 +24,7 @@ type Dish = {
   steps?: string[];
   approx_macros?: Macros;
   cookable_now?: boolean;
-  image?: { url: string; photographer: string; credit_url: string };
+  image?: { url: string; credit_url?: string };
 };
 type Scan = {
   id: string;

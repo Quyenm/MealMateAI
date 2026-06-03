@@ -143,8 +143,9 @@ export async function POST(req: Request) {
       nonStapleMissing(a) - nonStapleMissing(b) ||
       (usesMeat(b) ? 1 : 0) - (usesMeat(a) ? 1 : 0),
   );
-  // Attach a real dish photo (Wikipedia, fetched in parallel, cached in the row
-  // below). Returns null for dishes without a page — the UI shows a branded
+  const admin = createAdminClient();
+  // Attach a real dish photo (YouTube thumbnail, cached in dish_images, fetched
+  // in parallel). Returns null when no key/match — the UI shows a branded
   // placeholder rather than an unrelated stock photo.
   const dishes = await Promise.all(
     ranked
@@ -152,12 +153,11 @@ export async function POST(req: Request) {
       .map(async (d) => ({
         ...d,
         cookable_now: nonStapleMissing(d) === 0,
-        image: (await fetchDishImage(d.title_vi, d.title_en)) ?? undefined,
+        image: (await fetchDishImage(d.title_vi, d.title_en, admin)) ?? undefined,
       })),
   );
 
   // Persist (text only — never the photo).
-  const admin = createAdminClient();
   const { data: scan } = await admin
     .from("scans")
     .insert({

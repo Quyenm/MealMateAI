@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -49,7 +49,7 @@ type Dish = {
   steps?: string[];
   approx_macros?: Macros;
   cookable_now?: boolean;
-  image?: { url: string; photographer: string; credit_url: string };
+  image?: { url: string; credit_url?: string };
 };
 type Step = "capture" | "recognizing" | "confirm" | "suggesting" | "results";
 
@@ -94,6 +94,21 @@ export default function ScanPage() {
     const have = new Set(ingredients.map((g) => norm(g.name_vi)));
     return fridgeItems.filter((f) => !have.has(norm(f.name)));
   })();
+
+  // Open a dish detail and push a history entry, so the browser/phone Back
+  // button returns to the suggestion list (not all the way back to the scan).
+  function openDish(i: number) {
+    setSelectedDish(i);
+    window.history.pushState({ mmDish: i }, "");
+  }
+  useEffect(() => {
+    function onPop() {
+      setCooking(false);
+      setSelectedDish(null);
+    }
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -502,7 +517,7 @@ export default function ScanPage() {
               <button
                 key={i}
                 type="button"
-                onClick={() => setSelectedDish(i)}
+                onClick={() => openDish(i)}
                 className="group flex flex-col overflow-hidden rounded-3xl bg-card text-left shadow-card ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-float"
               >
                 <DishCover image={d.image} className="aspect-[16/10]">
@@ -539,10 +554,7 @@ export default function ScanPage() {
         <div className="mx-auto flex w-full max-w-2xl flex-col gap-3">
           <button
             type="button"
-            onClick={() => {
-              setCooking(false);
-              setSelectedDish(null);
-            }}
+            onClick={() => window.history.back()}
             className="flex w-fit items-center gap-1 text-sm font-medium text-muted-foreground transition hover:text-foreground"
           >
             <ChevronLeft className="size-4" /> {t.scan.backToList}
