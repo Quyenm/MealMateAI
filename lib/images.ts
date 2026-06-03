@@ -1,32 +1,40 @@
-const PEXELS_KEY = process.env.PEXELS_API_KEY;
-
-export type DishImage = { url: string; photographer: string; credit_url: string };
+export type DishImage = { url: string; credit_url: string };
 
 /**
- * One illustrative food photo for a dish, from Pexels (searched by English name).
- * Returns null if no key is configured or nothing matches — callers MUST handle
- * null and fall back gracefully (no image). Fetched once at suggest-time and
- * cached in the suggestion row, so viewing history never re-hits the API.
+ * One photo for a dish from Wikipedia (the actual dish when it has a page).
+ * Unlike generic stock search this won't return an unrelated photo — if there's
+ * no good match it returns null and the UI shows a branded placeholder instead.
  */
-export async function fetchDishImage(query: string): Promise<DishImage | null> {
-  if (!PEXELS_KEY || !query) return null;
+async function wiki(lang: "vi" | "en", title: string): Promise<DishImage | null> {
   try {
     const res = await fetch(
-      `https://api.pexels.com/v1/search?query=${encodeURIComponent(
-        query + " vietnamese food",
-      )}&per_page=1&orientation=landscape`,
-      { headers: { Authorization: PEXELS_KEY }, signal: AbortSignal.timeout(4000) },
+      `https://${lang}.wikipedia.org/w/api.php?action=query&format=json&generator=search` +
+        `&gsrsearch=${encodeURIComponent(title)}&gsrlimit=1&prop=pageimages&piprop=thumbnail&pithumbsize=640&origin=*`,
+      { headers: { "User-Agent": "MealMateAI/1.0 (cooking app)" }, signal: AbortSignal.timeout(3500) },
     );
     if (!res.ok) return null;
     const data = await res.json();
-    const p = data.photos?.[0];
-    if (!p?.src) return null;
-    return {
-      url: p.src.landscape ?? p.src.medium ?? p.src.original,
-      photographer: p.photographer ?? "",
-      credit_url: p.url ?? "https://www.pexels.com",
-    };
+    const pages = data?.query?.pages as Record<string, { thumbnail?: { source?: string } }> | undefined;
+    if (!pages) return null;
+    for (const id of Object.keys(pages)) {
+      const thumb = pages[id]?.thumbnail?.source;
+      if (thumb) return { url: thumb, credit_url: `https://${lang}.wikipedia.org/?curid=${id}` };
+    }
+    return null;
   } catch {
     return null;
   }
+}
+
+/** Try the Vietnamese dish name (vi.wikipedia) first, then the English name. */
+export async function fetchDishImage(titleVi: string, titleEn?: string): Promise<DishImage | null> {
+  if (titleVi) {
+    const v = await wiki("vi", titleVi);
+    if (v) return v;
+  }
+  if (titleEn) {
+    const e = await wiki("en", titleEn);
+    if (e) return e;
+  }
+  return null;
 }

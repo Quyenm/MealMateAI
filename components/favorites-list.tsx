@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DishCover } from "@/components/dish-cover";
 import { Clock, PlayCircle, Heart, ChevronDown, ChefHat } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useLang } from "@/components/landing/i18n";
@@ -113,20 +114,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
         const isOpen = open === s.id;
         return (
           <div key={s.id} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
-            {d.image && (
-              <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={d.image.url} alt="" className="h-full w-full object-cover" />
-                <a
-                  href={d.image.credit_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-1.5 right-1.5 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
-                >
-                  Pexels
-                </a>
-              </div>
-            )}
+            <DishCover image={d.image} className="aspect-[16/9]" credit />
             <div className="flex flex-col gap-2 p-4">
               <div className="flex items-start justify-between gap-2">
                 <span className="font-bold tracking-tight">{dTitle(d)}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { DishCover } from "@/components/dish-cover";
 import { Plus, X, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useLang } from "@/components/landing/i18n";
@@ -103,10 +104,11 @@ export function MealPlan({
                       key={it.id}
                       className="flex items-center gap-2 rounded-xl bg-background p-2 ring-1 ring-border/60"
                     >
-                      {it.dish.image && (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img src={it.dish.image.url} alt="" className="size-9 rounded-lg object-cover" />
-                      )}
+                      <DishCover
+                        image={it.dish.image}
+                        className="size-9 shrink-0 rounded-lg"
+                        iconClassName="size-4"
+                      />
                       <span className="flex-1 text-sm font-medium">{dTitle(it.dish)}</span>
                       <button
                         type="button"
@@ -160,10 +162,11 @@ export function MealPlan({
                     }}
                     className="flex items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-card ring-1 ring-border/60 transition hover:shadow-float"
                   >
-                    {f.dish.image && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={f.dish.image.url} alt="" className="size-12 rounded-lg object-cover" />
-                    )}
+                    <DishCover
+                      image={f.dish.image}
+                      className="size-12 shrink-0 rounded-lg"
+                      iconClassName="size-5"
+                    />
                     <span className="text-sm font-medium">{dTitle(f.dish)}</span>
                   </button>
                 ))}

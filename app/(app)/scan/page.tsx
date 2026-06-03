@@ -20,6 +20,7 @@ import { useT, useLang } from "@/components/landing/i18n";
 import { StarRating } from "@/components/star-rating";
 import { SaveDishButton } from "@/components/save-dish-button";
 import { CookMode } from "@/components/cook-mode";
+import { DishCover } from "@/components/dish-cover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -424,21 +425,13 @@ export default function ScanPage() {
                 onClick={() => setSelectedDish(i)}
                 className="group flex flex-col overflow-hidden rounded-3xl bg-card text-left shadow-card ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-float"
               >
-                {d.image && (
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={d.image.url}
-                      alt=""
-                      className="h-full w-full object-cover transition group-hover:scale-[1.03]"
-                    />
-                    {d.cookable_now === false && (
-                      <span className="absolute left-2 top-2 rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e] shadow-sm">
-                        {t.scan.almostBadge}
-                      </span>
-                    )}
-                  </div>
-                )}
+                <DishCover image={d.image} className="aspect-[16/10]">
+                  {d.cookable_now === false && (
+                    <span className="absolute left-2 top-2 rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e] shadow-sm">
+                      {t.scan.almostBadge}
+                    </span>
+                  )}
+                </DishCover>
                 <div className="flex flex-1 flex-col gap-1.5 p-4">
                   <span className="font-bold tracking-tight">{dishTitle(d)}</span>
                   <span className="inline-flex w-fit items-center gap-1 rounded-full bg-warm-50 px-2 py-0.5 text-xs font-medium text-[#b85a2e]">
@@ -476,20 +469,7 @@ export default function ScanPage() {
           </button>
 
           <div className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
-            {selected.image && (
-              <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={selected.image.url} alt="" className="h-full w-full object-cover" />
-                <a
-                  href={selected.image.credit_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="absolute bottom-1.5 right-1.5 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
-                >
-                  Pexels
-                </a>
-              </div>
-            )}
+            <DishCover image={selected.image} className="aspect-[16/9]" credit />
             <div className="flex flex-col gap-3 p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">

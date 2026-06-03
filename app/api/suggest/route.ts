@@ -143,15 +143,16 @@ export async function POST(req: Request) {
       nonStapleMissing(a) - nonStapleMissing(b) ||
       (usesMeat(b) ? 1 : 0) - (usesMeat(a) ? 1 : 0),
   );
-  // Attach an illustrative photo per dish (Pexels, fetched in parallel, cached
-  // in the row below). Fails open to no-image if PEXELS_API_KEY is unset.
+  // Attach a real dish photo (Wikipedia, fetched in parallel, cached in the row
+  // below). Returns null for dishes without a page — the UI shows a branded
+  // placeholder rather than an unrelated stock photo.
   const dishes = await Promise.all(
     ranked
       .slice(0, 10)
       .map(async (d) => ({
         ...d,
         cookable_now: nonStapleMissing(d) === 0,
-        image: (await fetchDishImage(d.title_en || d.title_vi)) ?? undefined,
+        image: (await fetchDishImage(d.title_vi, d.title_en)) ?? undefined,
       })),
   );
 
