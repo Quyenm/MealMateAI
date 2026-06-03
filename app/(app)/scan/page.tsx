@@ -167,7 +167,7 @@ export default function ScanPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 lg:p-8">
       <h1 className="text-xl font-bold tracking-tight">{t.scan.title}</h1>
 
       {/* STEP: capture */}
@@ -307,6 +307,7 @@ export default function ScanPage() {
               {t.scan.resultsEmpty}
             </div>
           )}
+          <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
           {dishes.map((d, i) => {
             const open = openDish === i;
             return (
@@ -355,6 +356,7 @@ export default function ScanPage() {
               </div>
             );
           })}
+          </div>
           <Button variant="outline" onClick={reset}>
             <RefreshCw className="size-4" /> {t.scan.scanAgain}
           </Button>

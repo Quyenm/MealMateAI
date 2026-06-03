@@ -21,7 +21,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
     : ITEMS;
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
       <div className="mx-auto flex w-full max-w-md items-stretch justify-around">
         {items.map(({ href, key, Icon }) => {
           const active = pathname === href || pathname.startsWith(href + "/");

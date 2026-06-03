@@ -37,7 +37,7 @@ export default async function HistoryPage() {
   const scans = (data ?? []) as unknown as Scan[];
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
+    <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4 lg:p-8">
       <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
 
       {scans.length === 0 && (
@@ -49,6 +49,7 @@ export default async function HistoryPage() {
         </div>
       )}
 
+      <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
       {scans.map((sc) => {
         const ingredients = sc.scan_ingredients.map((g) => g.name_vi).filter(Boolean);
         const dishes = sc.suggestions?.[0]?.dishes ?? [];
@@ -96,6 +97,7 @@ export default async function HistoryPage() {
           </div>
         );
       })}
+      </div>
     </main>
   );
 }

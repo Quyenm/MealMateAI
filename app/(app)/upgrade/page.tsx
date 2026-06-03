@@ -46,12 +46,13 @@ export default async function UpgradePage() {
     n === 0 ? t.free : `${n.toLocaleString(locale === "en" ? "en-US" : "vi-VN")}đ`;
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
-      <div>
+    <main className="mx-auto w-full max-w-5xl p-4 lg:p-8">
+      <div className="mb-6">
         <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
       </div>
 
+      <div className="grid gap-4 lg:grid-cols-3 lg:items-start">
       {tiers.map((tier) => {
         const isCurrent = tier.tier === currentTier;
         const isRec = tier.tier === RECOMMENDED;
@@ -108,6 +109,7 @@ export default async function UpgradePage() {
           </div>
         );
       })}
+      </div>
     </main>
   );
 }

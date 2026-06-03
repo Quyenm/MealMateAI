@@ -33,7 +33,7 @@ export default async function AdminPage() {
   const rows = (data ?? []) as unknown as Row[];
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
+    <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 lg:p-8">
       <div>
         <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
@@ -45,6 +45,7 @@ export default async function AdminPage() {
         </div>
       )}
 
+      <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
       {rows.map((p) => {
         const note = `MM ${p.tier_purchased.toUpperCase()} ${p.user_id.slice(0, 6)}`;
         return (
@@ -75,6 +76,7 @@ export default async function AdminPage() {
           </div>
         );
       })}
+      </div>
     </main>
   );
 }

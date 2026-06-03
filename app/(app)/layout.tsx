@@ -1,26 +1,22 @@
 import { Suspense } from "react";
 import { getCurrentUser, getIsAdmin } from "@/lib/auth";
 import { AppHeader } from "@/components/app-header";
+import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 
 /**
- * Authenticated app shell.
+ * Authenticated app shell. Responsive:
+ *  - lg+ : a fixed left sidebar rail + content offset by it (desktop dashboard).
+ *  - <lg : a sticky top header + a fixed bottom nav (mobile app).
  *
- * Kept SYNCHRONOUS on purpose: an async layout would block every client
- * navigation on its own getUser()/profiles round-trip BEFORE the page's
- * loading.tsx skeleton can render (in Next 16, loading.js does not wrap
- * layout.js). By moving the auth-gated nav into its own <Suspense> boundary,
- * the shell renders instantly and the nav streams in.
+ * Kept SYNCHRONOUS so client navigations show the page's loading.tsx skeleton
+ * instantly; the auth-gated nav (sidebar + bottom bar) streams in via Suspense.
  */
-export default function AppLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-full flex-1 flex-col">
+    <div className="flex min-h-full flex-1 flex-col lg:pl-64">
       <AppHeader />
-      <div className="flex flex-1 flex-col pb-20">{children}</div>
+      <div className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</div>
       <Suspense fallback={<NavFallback />}>
         <AppNav />
       </Suspense>
@@ -33,12 +29,20 @@ async function AppNav() {
   const user = await getCurrentUser();
   if (!user) return null;
   const isAdmin = await getIsAdmin();
-  return <BottomNav isAdmin={isAdmin} />;
+  return (
+    <>
+      <AppSidebar isAdmin={isAdmin} />
+      <BottomNav isAdmin={isAdmin} />
+    </>
+  );
 }
 
-/** Reserve the nav bar's footprint so the page doesn't shift when it streams in. */
+/** Reserve the nav footprints so content doesn't shift when they stream in. */
 function NavFallback() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 h-[57px] border-t border-border bg-background/95 backdrop-blur" />
+    <>
+      <div className="fixed inset-y-0 left-0 z-40 hidden w-64 border-r border-border bg-card/60 lg:block" />
+      <div className="fixed inset-x-0 bottom-0 z-40 h-[57px] border-t border-border bg-background/95 backdrop-blur lg:hidden" />
+    </>
   );
 }
