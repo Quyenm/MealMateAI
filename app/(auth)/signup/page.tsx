@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/components/landing/i18n";
+import { Turnstile, TURNSTILE_ENABLED } from "@/components/turnstile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,6 +16,7 @@ export default function SignupPage() {
   const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captcha, setCaptcha] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSignup(e: React.FormEvent) {
@@ -28,10 +30,15 @@ export default function SignupPage() {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        captchaToken: captcha ?? undefined,
+      },
     });
     setLoading(false);
     if (error) {
+      window.turnstile?.reset();
+      setCaptcha(null);
       toast.error(t.auth.signupFail, { description: error.message });
       return;
     }
@@ -84,7 +91,12 @@ export default function SignupPage() {
             placeholder={t.auth.passwordHint}
           />
         </div>
-        <Button type="submit" disabled={loading} className="shadow-float">
+        <Turnstile onToken={setCaptcha} />
+        <Button
+          type="submit"
+          disabled={loading || (TURNSTILE_ENABLED && !captcha)}
+          className="shadow-float"
+        >
           {loading ? t.auth.signupLoading : t.auth.signupCta}
         </Button>
       </form>

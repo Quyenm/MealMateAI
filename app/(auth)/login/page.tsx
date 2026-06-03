@@ -6,6 +6,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 import { useT } from "@/components/landing/i18n";
+import { Turnstile, TURNSTILE_ENABLED } from "@/components/turnstile";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,15 +22,22 @@ export default function LoginPage() {
   const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [captcha, setCaptcha] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleEmailLogin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+      options: { captchaToken: captcha ?? undefined },
+    });
     setLoading(false);
     if (error) {
+      window.turnstile?.reset();
+      setCaptcha(null);
       toast.error(t.auth.loginFail, { description: error.message });
       return;
     }
@@ -79,7 +87,12 @@ export default function LoginPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
-        <Button type="submit" disabled={loading} className="shadow-float">
+        <Turnstile onToken={setCaptcha} />
+        <Button
+          type="submit"
+          disabled={loading || (TURNSTILE_ENABLED && !captcha)}
+          className="shadow-float"
+        >
           {loading ? t.auth.loginLoading : t.auth.loginCta}
         </Button>
       </form>

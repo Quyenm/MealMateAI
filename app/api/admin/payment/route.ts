@@ -25,27 +25,12 @@ export async function POST(req: Request) {
   }
 
   if (action === "approve") {
-    if (payment.status !== "paid") {
-      const periodEnd = new Date(Date.now() + 30 * 24 * 3600 * 1000).toISOString();
-      await admin
-        .from("subscriptions")
-        .update({ status: "expired" })
-        .eq("user_id", payment.user_id)
-        .eq("status", "active");
-      await admin.from("subscriptions").insert({
-        user_id: payment.user_id,
-        tier: payment.tier_purchased,
-        status: "active",
-        current_period_end: periodEnd,
-      });
-      await admin
-        .from("profiles")
-        .update({ tier: payment.tier_purchased })
-        .eq("id", payment.user_id);
-      await admin
-        .from("payments")
-        .update({ status: "paid", paid_at: new Date().toISOString() })
-        .eq("id", paymentId);
+    // One atomic transaction (see migration 0006): mark paid + upgrade tier +
+    // refresh subscription. Idempotent on already-paid payments.
+    const { error } = await admin.rpc("approve_payment", { p_payment_id: paymentId });
+    if (error) {
+      console.error("approve_payment failed", error);
+      return NextResponse.json({ error: "approve_failed" }, { status: 500 });
     }
     return NextResponse.json({ ok: true });
   }

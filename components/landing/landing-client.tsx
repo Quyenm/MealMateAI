@@ -1007,13 +1007,24 @@ function Footer() {
           <div key={col.title}>
             <h3 className="text-[13px] font-semibold uppercase tracking-[0.1em] text-foreground/70">{col.title}</h3>
             <ul className="mt-4 flex flex-col gap-2.5">
-              {col.links.map((label, li) => (
-                <li key={label}>
-                  <a href={FOOTER_HREFS[ci][li]} className="text-sm text-muted-foreground transition-colors hover:text-foreground">
-                    {label}
-                  </a>
-                </li>
-              ))}
+              {col.links.map((label, li) => {
+                const href = FOOTER_HREFS[ci][li];
+                // No real destination yet → render as plain text, not a dead link.
+                return (
+                  <li key={label}>
+                    {href && href !== "#" ? (
+                      <a
+                        href={href}
+                        className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+                      >
+                        {label}
+                      </a>
+                    ) : (
+                      <span className="text-sm text-muted-foreground/70">{label}</span>
+                    )}
+                  </li>
+                );
+              })}
             </ul>
           </div>
         ))}

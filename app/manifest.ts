@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Chụp tủ lạnh — AI gợi món nấu được ngay.",
     start_url: "/home",
     display: "standalone",
-    background_color: "#ffffff",
-    theme_color: "#16a34a",
+    background_color: "#fcfaf6",
+    theme_color: "#2ba3d9",
     icons: [
       { src: "/icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
       { src: "/icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
