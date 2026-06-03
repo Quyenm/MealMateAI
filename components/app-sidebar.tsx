@@ -2,17 +2,36 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Camera, Clock, Heart, CreditCard, Settings, ShieldCheck, type LucideIcon } from "lucide-react";
+import {
+  Home,
+  Camera,
+  Clock,
+  Heart,
+  ShoppingCart,
+  CreditCard,
+  Settings,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
 import { useT } from "@/components/landing/i18n";
 import { LangSwitcher } from "@/components/lang-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
 
-type NavKey = "home" | "scan" | "history" | "favorites" | "plans" | "settings" | "admin";
+type NavKey =
+  | "home"
+  | "scan"
+  | "history"
+  | "favorites"
+  | "shopping"
+  | "plans"
+  | "settings"
+  | "admin";
 const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
   { href: "/home", key: "home", Icon: Home },
   { href: "/scan", key: "scan", Icon: Camera },
   { href: "/history", key: "history", Icon: Clock },
   { href: "/favorites", key: "favorites", Icon: Heart },
+  { href: "/shopping", key: "shopping", Icon: ShoppingCart },
   { href: "/upgrade", key: "plans", Icon: CreditCard },
   { href: "/settings", key: "settings", Icon: Settings },
 ];

@@ -185,6 +185,21 @@ export default function ScanPage() {
     }
   }
 
+  async function addToShopping(names: string[]) {
+    if (!names.length) return;
+    try {
+      const res = await fetch("/api/shopping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "add", names }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      toast.success(t.shopping.added);
+    } catch {
+      toast.error(t.scan.toast.netErr);
+    }
+  }
+
   function reset() {
     setStep("capture");
     setPreview(null);
@@ -428,9 +443,18 @@ export default function ScanPage() {
               </div>
               <p className="text-sm text-muted-foreground">{dishWhy(selected)}</p>
               {dishMissing(selected).length > 0 && (
-                <p className="text-xs text-muted-foreground">
-                  {t.scan.needMore}: {dishMissing(selected).join(", ")}
-                </p>
+                <div className="flex flex-col gap-1.5">
+                  <p className="text-xs text-muted-foreground">
+                    {t.scan.needMore}: {dishMissing(selected).join(", ")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => addToShopping(dishMissing(selected))}
+                    className="flex w-fit items-center gap-1 text-xs font-medium text-primary hover:underline"
+                  >
+                    <Plus className="size-3.5" /> {t.shopping.addMissing}
+                  </button>
+                </div>
               )}
               {selected.approx_macros && (
                 <p className="text-xs text-muted-foreground">

@@ -46,6 +46,7 @@ export const STR = {
       admin: "Admin",
       settings: "Khẩu vị",
       favorites: "Đã lưu",
+      shopping: "Đi chợ",
       signOut: "Đăng xuất",
     },
     settings: {
@@ -88,6 +89,15 @@ export const STR = {
       prev: "Trước",
       next: "Tiếp",
       close: "Đóng",
+    },
+    shopping: {
+      title: "Đi chợ",
+      empty: "Danh sách trống.",
+      add: "Thêm",
+      placeholder: "Thêm món cần mua…",
+      clearChecked: "Xoá món đã mua",
+      added: "Đã thêm vào đi chợ",
+      addMissing: "Thêm vào đi chợ",
     },
     home: {
       greeting: "Xin chào",
@@ -423,6 +433,7 @@ export const STR = {
       admin: "Admin",
       settings: "Taste",
       favorites: "Saved",
+      shopping: "Shopping",
       signOut: "Sign out",
     },
     settings: {
@@ -465,6 +476,15 @@ export const STR = {
       prev: "Back",
       next: "Next",
       close: "Close",
+    },
+    shopping: {
+      title: "Shopping list",
+      empty: "Your list is empty.",
+      add: "Add",
+      placeholder: "Add an item to buy…",
+      clearChecked: "Clear bought",
+      added: "Added to shopping list",
+      addMissing: "Add to shopping list",
     },
     home: {
       greeting: "Hi",
