@@ -55,6 +55,16 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Let `?lang=vi|en` links seed the locale cookie so SSR renders that language.
+  const langParam = request.nextUrl.searchParams.get('lang')
+  if (langParam === 'vi' || langParam === 'en') {
+    response.cookies.set('mm-lang', langParam, {
+      path: '/',
+      maxAge: 60 * 60 * 24 * 365,
+      sameSite: 'lax',
+    })
+  }
+
   return response
 }
 

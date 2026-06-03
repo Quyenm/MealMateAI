@@ -53,7 +53,7 @@ import {
   HeroScanLoop,
   IngredientChip,
 } from "./app-screen";
-import { LangProvider, useLang, useT } from "./i18n";
+import { useLang, useT } from "./i18n";
 
 export type LandingTier = {
   tier: string;
@@ -1057,9 +1057,7 @@ function LandingContent({ authed, tiers }: { authed: boolean; tiers: LandingTier
 }
 
 export function LandingClient({ authed, tiers }: { authed: boolean; tiers: LandingTier[] }) {
-  return (
-    <LangProvider>
-      <LandingContent authed={authed} tiers={tiers} />
-    </LangProvider>
-  );
+  // The LangProvider is mounted once in the root layout (app/layout.tsx) so the
+  // language choice carries across the whole app, not just here.
+  return <LandingContent authed={authed} tiers={tiers} />;
 }
