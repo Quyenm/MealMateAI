@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { suggestDishes, type Ingredient } from "@/lib/ai/openai";
+import { fetchDishImage } from "@/lib/images";
 import { underSpendCap, recordSpend } from "@/lib/spend-guard";
 import { getQuota, commitScan } from "@/lib/quota";
 import { rateLimit } from "@/lib/ratelimit";
@@ -91,9 +92,17 @@ export async function POST(req: Request) {
   const nonStapleMissing = (d: (typeof result.dishes)[number]) =>
     (d.missing_ingredients ?? []).filter((m) => !isStaple(m)).length;
   const ranked = [...result.dishes].sort((a, b) => nonStapleMissing(a) - nonStapleMissing(b));
-  const dishes = ranked
-    .slice(0, (quota?.suggestions_per_scan ?? 3) + 2)
-    .map((d) => ({ ...d, cookable_now: nonStapleMissing(d) === 0 }));
+  // Attach an illustrative photo per dish (Pexels, fetched in parallel, cached
+  // in the row below). Fails open to no-image if PEXELS_API_KEY is unset.
+  const dishes = await Promise.all(
+    ranked
+      .slice(0, (quota?.suggestions_per_scan ?? 3) + 2)
+      .map(async (d) => ({
+        ...d,
+        cookable_now: nonStapleMissing(d) === 0,
+        image: (await fetchDishImage(d.title_en || d.title_vi)) ?? undefined,
+      })),
+  );
 
   // Persist (text only — never the photo).
   const admin = createAdminClient();

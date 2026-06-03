@@ -17,6 +17,7 @@ type Dish = {
   steps?: string[];
   approx_macros?: Macros;
   cookable_now?: boolean;
+  image?: { url: string; photographer: string; credit_url: string };
 };
 type Scan = {
   id: string;
@@ -92,6 +93,20 @@ export default async function HistoryPage() {
                     </span>
                     <ChevronDown className="size-4 shrink-0 text-muted-foreground transition group-open:rotate-180" />
                   </summary>
+                  {d.image && (
+                    <div className="relative mt-2 aspect-[16/9] w-full overflow-hidden rounded-lg bg-muted">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={d.image.url} alt="" className="h-full w-full object-cover" />
+                      <a
+                        href={d.image.credit_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="absolute bottom-1 right-1 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
+                      >
+                        Pexels
+                      </a>
+                    </div>
+                  )}
                   {d.why && <p className="mt-2 text-xs text-muted-foreground">{d.why}</p>}
                   {d.approx_macros && (
                     <p className="mt-1 text-xs text-muted-foreground">
