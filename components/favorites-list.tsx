@@ -60,6 +60,29 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
     }
   }
 
+  async function logMacros(d: Dish) {
+    if (!d.approx_macros) return;
+    const log_date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).format(new Date());
+    try {
+      const res = await fetch("/api/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          log_date,
+          dish_title: d.title_vi,
+          kcal: d.approx_macros.kcal,
+          protein_g: d.approx_macros.protein_g,
+          carbs_g: d.approx_macros.carbs_g,
+          fat_g: d.approx_macros.fat_g,
+        }),
+      });
+      if (res.ok) toast.success(t.nutrition.logged);
+    } catch {
+      /* non-blocking */
+    }
+  }
+
   async function remove(s: SavedDish) {
     setItems((xs) => xs.filter((x) => x.id !== s.id));
     try {
@@ -166,7 +189,10 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
           steps={dSteps(cookDish)}
           defaultMin={cookDish.cook_time_min}
           onClose={() => setCookDish(null)}
-          onFinish={() => deduct(cookDish.uses_ingredients ?? [])}
+          onFinish={() => {
+            deduct(cookDish.uses_ingredients ?? []);
+            logMacros(cookDish);
+          }}
         />
       )}
     </>

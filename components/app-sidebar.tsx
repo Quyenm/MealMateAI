@@ -9,6 +9,7 @@ import {
   Clock,
   Heart,
   CalendarDays,
+  Apple,
   ShoppingCart,
   CreditCard,
   Settings,
@@ -26,6 +27,7 @@ type NavKey =
   | "history"
   | "favorites"
   | "mealplan"
+  | "nutrition"
   | "shopping"
   | "plans"
   | "settings"
@@ -36,6 +38,7 @@ const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
   { href: "/fridge", key: "fridge", Icon: Refrigerator },
   { href: "/favorites", key: "favorites", Icon: Heart },
   { href: "/plan", key: "mealplan", Icon: CalendarDays },
+  { href: "/nutrition", key: "nutrition", Icon: Apple },
   { href: "/history", key: "history", Icon: Clock },
   { href: "/shopping", key: "shopping", Icon: ShoppingCart },
   { href: "/upgrade", key: "plans", Icon: CreditCard },

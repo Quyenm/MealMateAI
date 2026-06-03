@@ -49,6 +49,7 @@ export const STR = {
       shopping: "Đi chợ",
       fridge: "Tủ lạnh",
       mealplan: "Thực đơn",
+      nutrition: "Dinh dưỡng",
       signOut: "Đăng xuất",
     },
     settings: {
@@ -124,6 +125,15 @@ export const STR = {
       autoFill: "Tự xếp tuần",
       today: "Hôm nay",
       close: "Đóng",
+    },
+    nutrition: {
+      title: "Dinh dưỡng",
+      today: "Hôm nay",
+      goal: "Mục tiêu kcal/ngày",
+      setGoal: "Lưu",
+      empty: "Hôm nay chưa ghi món nào — nấu xong sẽ tự ghi.",
+      logged: "Đã ghi dinh dưỡng",
+      goalSaved: "Đã lưu mục tiêu",
     },
     home: {
       greeting: "Xin chào",
@@ -462,6 +472,7 @@ export const STR = {
       shopping: "Shopping",
       fridge: "Fridge",
       mealplan: "Menu",
+      nutrition: "Nutrition",
       signOut: "Sign out",
     },
     settings: {
@@ -537,6 +548,15 @@ export const STR = {
       autoFill: "Auto-fill week",
       today: "Today",
       close: "Close",
+    },
+    nutrition: {
+      title: "Nutrition",
+      today: "Today",
+      goal: "Daily kcal goal",
+      setGoal: "Save",
+      empty: "Nothing logged today — finishing a cook auto-logs it.",
+      logged: "Logged to nutrition",
+      goalSaved: "Goal saved",
     },
     home: {
       greeting: "Hi",

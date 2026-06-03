@@ -221,6 +221,29 @@ export default function ScanPage() {
     }
   }
 
+  async function logMacros(dish: Dish) {
+    if (!dish.approx_macros) return;
+    const log_date = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho_Chi_Minh" }).format(new Date());
+    try {
+      const res = await fetch("/api/nutrition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "add",
+          log_date,
+          dish_title: dish.title_vi,
+          kcal: dish.approx_macros.kcal,
+          protein_g: dish.approx_macros.protein_g,
+          carbs_g: dish.approx_macros.carbs_g,
+          fat_g: dish.approx_macros.fat_g,
+        }),
+      });
+      if (res.ok) toast.success(t.nutrition.logged);
+    } catch {
+      /* non-blocking */
+    }
+  }
+
   async function addToShopping(names: string[]) {
     if (!names.length) return;
     try {
@@ -544,7 +567,10 @@ export default function ScanPage() {
               steps={dishSteps(selected)}
               defaultMin={selected.cook_time_min}
               onClose={() => setCooking(false)}
-              onFinish={() => deductFromFridge(selected.uses_ingredients ?? [])}
+              onFinish={() => {
+                deductFromFridge(selected.uses_ingredients ?? []);
+                logMacros(selected);
+              }}
             />
           )}
         </div>
