@@ -1,17 +1,14 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Check, Sparkles } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/i18n/server";
+import { STR } from "@/lib/i18n/strings";
 import { UpgradeButton } from "@/components/upgrade-button";
-import { buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
+
+// The tier highlighted as the best value.
+const RECOMMENDED = "vip";
 
 type Tier = {
   tier: string;
@@ -21,23 +18,16 @@ type Tier = {
   price_vnd: number;
 };
 
-// Features unlocked now (quota) vs deferred (shown as "sắp có").
-const COMING_SOON: Record<string, string[]> = {
-  vip: ["Lên thực đơn cả tuần (sắp có)", "Nhắc nguyên liệu sắp hỏng (sắp có)"],
-  svip: ["Theo dõi dinh dưỡng / macro (sắp có)", "Cá nhân hoá nâng cao (sắp có)"],
-  family: ["Dùng chung 6 người (sắp có)", "Tủ lạnh chung gia đình (sắp có)"],
-};
-
-function vnd(n: number) {
-  return n === 0 ? "Miễn phí" : `${n.toLocaleString("vi-VN")}đ/tháng`;
-}
-
 export default async function UpgradePage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/login");
+
+  const locale = await getLocale();
+  const s = STR[locale];
+  const t = s.plans;
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -52,50 +42,70 @@ export default async function UpgradePage() {
     .order("price_vnd");
   const tiers = (tiersData ?? []) as Tier[];
 
+  const vnd = (n: number) =>
+    n === 0 ? t.free : `${n.toLocaleString(locale === "en" ? "en-US" : "vi-VN")}đ`;
+
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Các gói</h1>
-        <Link href="/home" className={buttonVariants({ variant: "ghost", size: "sm" })}>
-          Trang chủ
-        </Link>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
       </div>
-      <p className="text-sm text-muted-foreground">
-        Nâng gói để có nhiều lượt quét hơn mỗi ngày. (Tính năng cao cấp đang phát triển.)
-      </p>
 
-      {tiers.map((t) => {
-        const isCurrent = t.tier === currentTier;
+      {tiers.map((tier) => {
+        const isCurrent = tier.tier === currentTier;
+        const isRec = tier.tier === RECOMMENDED;
+        const extras = s.pricing.extras[tier.tier] ?? [];
         return (
-          <Card key={t.tier} className={isCurrent ? "border-foreground" : undefined}>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between text-base">
-                <span>{t.display_label}</span>
-                {isCurrent && (
-                  <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-normal">
-                    Gói hiện tại
-                  </span>
-                )}
-              </CardTitle>
-              <CardDescription className="text-base font-medium text-foreground">
-                {vnd(t.price_vnd)}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-3">
-              <ul className="space-y-1 text-sm">
-                <li>✅ {t.daily_scan_limit} lượt quét / ngày</li>
-                <li>✅ Tối đa {t.suggestions_per_scan} món / lần</li>
-                {(COMING_SOON[t.tier] ?? []).map((f) => (
-                  <li key={f} className="text-muted-foreground">
-                    ⏳ {f}
-                  </li>
-                ))}
-              </ul>
-              {t.price_vnd > 0 && !isCurrent && (
-                <UpgradeButton tier={t.tier} label={`Mua ${t.display_label}`} />
+          <div
+            key={tier.tier}
+            className={`relative flex flex-col gap-4 rounded-3xl bg-card p-5 ring-1 transition ${
+              isRec ? "shadow-float ring-2 ring-primary" : "shadow-card ring-border/60"
+            }`}
+          >
+            {isRec && (
+              <span className="absolute -top-2.5 left-5 rounded-full bg-primary px-2.5 py-0.5 text-xs font-semibold text-primary-foreground">
+                {t.recommended}
+              </span>
+            )}
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="font-bold tracking-tight">{tier.display_label}</p>
+                <p className="mt-0.5 text-lg font-extrabold">
+                  {vnd(tier.price_vnd)}
+                  {tier.price_vnd > 0 && (
+                    <span className="text-sm font-medium text-muted-foreground">{t.perMonth}</span>
+                  )}
+                </p>
+              </div>
+              {isCurrent && (
+                <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium">
+                  {t.current}
+                </span>
               )}
-            </CardContent>
-          </Card>
+            </div>
+
+            <ul className="flex flex-col gap-2 text-sm">
+              <li className="flex items-center gap-2">
+                <Check className="size-4 shrink-0 text-primary" />
+                {tier.daily_scan_limit} {t.scansPerDay}
+              </li>
+              <li className="flex items-center gap-2">
+                <Check className="size-4 shrink-0 text-primary" />
+                {tier.suggestions_per_scan} {t.dishesPerScan}
+              </li>
+              {extras.map((f) => (
+                <li key={f} className="flex items-center gap-2 text-muted-foreground">
+                  <Sparkles className="size-4 shrink-0" />
+                  {f}
+                </li>
+              ))}
+            </ul>
+
+            {tier.price_vnd > 0 && !isCurrent && (
+              <UpgradeButton tier={tier.tier} label={`${t.buy} ${tier.display_label}`} />
+            )}
+          </div>
         );
       })}
     </main>

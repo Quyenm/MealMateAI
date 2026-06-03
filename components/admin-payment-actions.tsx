@@ -3,10 +3,12 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
 
 export function AdminPaymentActions({ paymentId }: { paymentId: string }) {
   const router = useRouter();
+  const t = useT();
   const [loading, setLoading] = useState(false);
 
   async function act(action: "approve" | "reject") {
@@ -18,20 +20,20 @@ export function AdminPaymentActions({ paymentId }: { paymentId: string }) {
     });
     setLoading(false);
     if (res.ok) {
-      toast.success(action === "approve" ? "Đã duyệt + nâng gói" : "Đã từ chối");
+      toast.success(action === "approve" ? t.admin.approved : t.admin.rejected);
       router.refresh();
     } else {
-      toast.error("Lỗi, thử lại");
+      toast.error(t.admin.error);
     }
   }
 
   return (
     <div className="flex gap-2">
-      <Button size="sm" onClick={() => act("approve")} disabled={loading}>
-        Duyệt
+      <Button size="sm" className="flex-1" onClick={() => act("approve")} disabled={loading}>
+        {t.admin.approve}
       </Button>
-      <Button size="sm" variant="outline" onClick={() => act("reject")} disabled={loading}>
-        Từ chối
+      <Button size="sm" variant="outline" className="flex-1" onClick={() => act("reject")} disabled={loading}>
+        {t.admin.reject}
       </Button>
     </div>
   );

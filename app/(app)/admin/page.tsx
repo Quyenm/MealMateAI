@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
 import { getAdminUser } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getLocale } from "@/lib/i18n/server";
+import { STR } from "@/lib/i18n/strings";
 import { AdminPaymentActions } from "@/components/admin-payment-actions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
 
@@ -19,6 +20,10 @@ export default async function AdminPage() {
   const adminUser = await getAdminUser();
   if (!adminUser) redirect("/home");
 
+  const locale = await getLocale();
+  const t = STR[locale].admin;
+  const numLocale = locale === "en" ? "en-US" : "vi-VN";
+
   const admin = createAdminClient();
   const { data } = await admin
     .from("payments")
@@ -29,35 +34,45 @@ export default async function AdminPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
-      <h1 className="text-lg font-semibold">Admin — Duyệt thanh toán</h1>
-      <p className="text-sm text-muted-foreground">
-        Đối chiếu với MoMo (đúng số tiền + nội dung) rồi bấm Duyệt.
-      </p>
+      <div>
+        <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
+      </div>
 
       {rows.length === 0 && (
-        <p className="text-sm text-muted-foreground">Không có yêu cầu nào đang chờ.</p>
+        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+          {t.empty}
+        </div>
       )}
 
       {rows.map((p) => {
         const note = `MM ${p.tier_purchased.toUpperCase()} ${p.user_id.slice(0, 6)}`;
         return (
-          <Card key={p.id}>
-            <CardHeader>
-              <CardTitle className="text-base">
-                {p.tier_purchased.toUpperCase()} — {p.amount_vnd.toLocaleString("vi-VN")}đ
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-col gap-2 text-sm">
-              <p>User: {p.profiles?.email ?? "?"}</p>
+          <div
+            key={p.id}
+            className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
+          >
+            <div className="flex items-center justify-between gap-3">
+              <span className="font-bold tracking-tight">{p.tier_purchased.toUpperCase()}</span>
+              <span className="font-bold text-primary">
+                {p.amount_vnd.toLocaleString(numLocale)}đ
+              </span>
+            </div>
+            <div className="flex flex-col gap-1 text-sm">
               <p>
-                Nội dung cần khớp: <b>{note}</b>
+                <span className="text-muted-foreground">{t.user}: </span>
+                {p.profiles?.email ?? "?"}
+              </p>
+              <p>
+                <span className="text-muted-foreground">{t.matchNote}: </span>
+                <span className="font-mono font-semibold">{note}</span>
               </p>
               <p className="text-xs text-muted-foreground">
-                {new Date(p.created_at).toLocaleString("vi-VN")}
+                {new Date(p.created_at).toLocaleString(numLocale)}
               </p>
-              <AdminPaymentActions paymentId={p.id} />
-            </CardContent>
-          </Card>
+            </div>
+            <AdminPaymentActions paymentId={p.id} />
+          </div>
         );
       })}
     </main>
