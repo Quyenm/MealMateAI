@@ -48,6 +48,7 @@ export const STR = {
       favorites: "Đã lưu",
       shopping: "Đi chợ",
       fridge: "Tủ lạnh",
+      mealplan: "Thực đơn",
       signOut: "Đăng xuất",
     },
     settings: {
@@ -113,6 +114,16 @@ export const STR = {
       saveFromScan: "Lưu vào tủ lạnh",
       savedToast: "Đã lưu vào tủ lạnh",
       deductedToast: "Đã cập nhật tủ lạnh",
+    },
+    mealPlan: {
+      title: "Thực đơn tuần",
+      add: "Thêm món",
+      empty: "Trống",
+      pick: "Chọn món đã lưu",
+      noFav: "Chưa lưu món nào — vào 'Đã lưu' lưu vài món trước.",
+      autoFill: "Tự xếp tuần",
+      today: "Hôm nay",
+      close: "Đóng",
     },
     home: {
       greeting: "Xin chào",
@@ -450,6 +461,7 @@ export const STR = {
       favorites: "Saved",
       shopping: "Shopping",
       fridge: "Fridge",
+      mealplan: "Menu",
       signOut: "Sign out",
     },
     settings: {
@@ -515,6 +527,16 @@ export const STR = {
       saveFromScan: "Save to fridge",
       savedToast: "Saved to fridge",
       deductedToast: "Fridge updated",
+    },
+    mealPlan: {
+      title: "Weekly menu",
+      add: "Add dish",
+      empty: "Empty",
+      pick: "Pick a saved dish",
+      noFav: "No saved dishes — save some from 'Saved' first.",
+      autoFill: "Auto-fill week",
+      today: "Today",
+      close: "Close",
     },
     home: {
       greeting: "Hi",
