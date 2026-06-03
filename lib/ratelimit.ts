@@ -30,6 +30,7 @@ const LIMITERS = {
   scan: make(15, "1 m"),
   suggest: make(15, "1 m"),
   claim: make(5, "10 m"),
+  community: make(8, "10 m"),
 } as const;
 
 export type RateKey = keyof typeof LIMITERS;

@@ -1,9 +1,23 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { X, ChevronLeft, ChevronRight, Play, Pause, RotateCcw, Check } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import {
+  X,
+  ChevronLeft,
+  ChevronRight,
+  Play,
+  Pause,
+  RotateCcw,
+  Check,
+  PartyPopper,
+  ImagePlus,
+  Send,
+} from "lucide-react";
+import { toast } from "sonner";
 import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { downscale } from "@/lib/client-image";
 
 /**
  * Full-screen step-by-step cooking mode with a countdown timer. Steps come from
@@ -29,6 +43,42 @@ export function CookMode({
   const [running, setRunning] = useState(false);
   const total = steps.length;
 
+  // Post-cook celebration + share-to-community.
+  const [celebrating, setCelebrating] = useState(false);
+  const [photo, setPhoto] = useState<string | null>(null);
+  const [note, setNote] = useState("");
+  const [posting, setPosting] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+
+  async function pickPhoto(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setPhoto(await downscale(file, 1080, 0.72));
+    } catch {
+      toast.error(t.cook.photoError);
+    }
+  }
+
+  async function share() {
+    if (!photo) return;
+    setPosting(true);
+    try {
+      const res = await fetch("/api/community", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ dish_title: title, note: note.trim() || undefined, image: photo }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(t.cook.posted);
+      onClose();
+    } catch {
+      toast.error(t.cook.postError);
+    } finally {
+      setPosting(false);
+    }
+  }
+
   useEffect(() => {
     if (!running || secs <= 0) return;
     const id = setTimeout(() => setSecs((s) => Math.max(0, s - 1)), 1000);
@@ -45,6 +95,82 @@ export function CookMode({
     setRunning(false);
     setSecs(m * 60);
   };
+
+  if (celebrating) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col bg-background">
+        <div className="flex items-center justify-end border-b border-border px-4 py-3">
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label={t.cook.close}
+            className="text-muted-foreground transition hover:text-foreground"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+        <div className="flex flex-1 flex-col items-center gap-5 overflow-y-auto p-6 text-center">
+          <div className="flex size-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#176f9c] text-white shadow-float">
+            <PartyPopper className="size-8" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">{t.cook.celebrateTitle}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t.cook.celebrateSub} <span className="font-semibold text-foreground">{title}</span>
+            </p>
+          </div>
+
+          <div className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-card p-5 text-left shadow-card ring-1 ring-border/60">
+            <span className="text-sm font-semibold">{t.cook.shareTitle}</span>
+            <input
+              ref={photoRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={pickPhoto}
+              className="hidden"
+            />
+            {photo ? (
+              <button
+                type="button"
+                onClick={() => photoRef.current?.click()}
+                className="overflow-hidden rounded-2xl ring-1 ring-border"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={photo} alt="" className="aspect-[4/3] w-full object-cover" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => photoRef.current?.click()}
+                className="flex aspect-[4/3] w-full flex-col items-center justify-center gap-2 rounded-2xl border-2 border-dashed border-border bg-background text-muted-foreground transition hover:border-primary hover:text-primary"
+              >
+                <ImagePlus className="size-7" />
+                <span className="text-sm font-medium">{t.cook.addPhoto}</span>
+              </button>
+            )}
+            <Input
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder={t.cook.notePlaceholder}
+              maxLength={280}
+            />
+            <Button onClick={share} disabled={!photo || posting} className="gap-1.5 shadow-float">
+              <Send className="size-4" /> {posting ? t.cook.posting : t.cook.shareCta}
+            </Button>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-sm font-medium text-muted-foreground transition hover:text-foreground"
+          >
+            {t.cook.later}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-background">
@@ -118,7 +244,7 @@ export function CookMode({
           <Button
             onClick={() => {
               onFinish?.();
-              onClose();
+              setCelebrating(true);
             }}
             className="gap-1 shadow-float"
           >

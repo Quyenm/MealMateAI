@@ -23,6 +23,7 @@ import { CookMode } from "@/components/cook-mode";
 import { DishCover } from "@/components/dish-cover";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { downscale } from "@/lib/client-image";
 
 type Ingredient = {
   name_vi: string;
@@ -51,18 +52,6 @@ type Dish = {
   image?: { url: string; photographer: string; credit_url: string };
 };
 type Step = "capture" | "recognizing" | "confirm" | "suggesting" | "results";
-
-async function downscale(file: File, maxEdge = 1024, quality = 0.7): Promise<string> {
-  const bitmap = await createImageBitmap(file);
-  const scale = Math.min(1, maxEdge / Math.max(bitmap.width, bitmap.height));
-  const w = Math.round(bitmap.width * scale);
-  const h = Math.round(bitmap.height * scale);
-  const canvas = document.createElement("canvas");
-  canvas.width = w;
-  canvas.height = h;
-  canvas.getContext("2d")!.drawImage(bitmap, 0, 0, w, h);
-  return canvas.toDataURL("image/jpeg", quality);
-}
 
 function youtubeSearch(query: string) {
   return `https://www.youtube.com/results?search_query=${encodeURIComponent("cách làm " + query)}`;
