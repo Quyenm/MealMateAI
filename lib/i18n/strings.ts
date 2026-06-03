@@ -45,6 +45,7 @@ export const STR = {
       plans: "Gói",
       admin: "Admin",
       settings: "Khẩu vị",
+      favorites: "Đã lưu",
       signOut: "Đăng xuất",
     },
     settings: {
@@ -65,6 +66,13 @@ export const STR = {
       saving: "Đang lưu…",
       saved: "Đã lưu khẩu vị!",
       saveError: "Lưu thất bại, thử lại",
+    },
+    favorites: {
+      title: "Món đã lưu",
+      empty: "Chưa lưu món nào — bấm ♥ ở món bạn thích để nấu sau.",
+      browse: "Quét tìm món",
+      save: "Lưu",
+      saved: "Đã lưu",
     },
     home: {
       greeting: "Xin chào",
@@ -399,6 +407,7 @@ export const STR = {
       plans: "Plans",
       admin: "Admin",
       settings: "Taste",
+      favorites: "Saved",
       signOut: "Sign out",
     },
     settings: {
@@ -419,6 +428,13 @@ export const STR = {
       saving: "Saving…",
       saved: "Taste saved!",
       saveError: "Save failed, try again",
+    },
+    favorites: {
+      title: "Saved dishes",
+      empty: "No saved dishes yet — tap ♥ on a dish you like to cook it later.",
+      browse: "Scan for dishes",
+      save: "Save",
+      saved: "Saved",
     },
     home: {
       greeting: "Hi",

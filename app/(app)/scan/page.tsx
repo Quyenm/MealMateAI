@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useT, useLang } from "@/components/landing/i18n";
 import { StarRating } from "@/components/star-rating";
+import { SaveDishButton } from "@/components/save-dish-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -442,14 +443,19 @@ export default function ScanPage() {
                   </li>
                 ))}
               </ol>
-              <a
-                href={youtubeSearch(selected.title_vi)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#ff0033]/10 px-4 py-2.5 text-sm font-semibold text-[#c8102e] transition hover:bg-[#ff0033]/15"
-              >
-                <PlayCircle className="size-[18px]" /> {t.scan.watchVideo}
-              </a>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <a
+                  href={youtubeSearch(selected.title_vi)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#ff0033]/10 px-4 py-2.5 text-sm font-semibold text-[#c8102e] transition hover:bg-[#ff0033]/15"
+                >
+                  <PlayCircle className="size-[18px]" /> {t.scan.watchVideo}
+                </a>
+                {scanId && (
+                  <SaveDishButton scanId={scanId} dishIndex={selectedDish} dish={selected} className="flex-1" />
+                )}
+              </div>
               {scanId && (
                 <StarRating scanId={scanId} dishIndex={selectedDish} dishTitle={selected.title_vi} />
               )}
