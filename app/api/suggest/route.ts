@@ -91,12 +91,24 @@ export async function POST(req: Request) {
   // keep their missing_ingredients so the UI can show "also needs X".
   const nonStapleMissing = (d: (typeof result.dishes)[number]) =>
     (d.missing_ingredients ?? []).filter((m) => !isStaple(m)).length;
-  const ranked = [...result.dishes].sort((a, b) => nonStapleMissing(a) - nonStapleMissing(b));
+  // Drop clearly-nonsense dishes that don't actually use anything in the pantry
+  // (accent-insensitive fuzzy match). Falls back to all if it would empty out.
+  const norm = (str: string) =>
+    str.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").trim();
+  const pantry = ingredients.map((g) => norm(g.name_vi)).filter((s) => s.length > 1);
+  const usesPantry = (d: (typeof result.dishes)[number]) =>
+    (d.uses_ingredients ?? []).some((u) => {
+      const un = norm(u);
+      return un.length > 1 && pantry.some((p) => p.includes(un) || un.includes(p));
+    });
+  const sane = result.dishes.filter(usesPantry);
+  const pool = sane.length ? sane : result.dishes;
+  const ranked = [...pool].sort((a, b) => nonStapleMissing(a) - nonStapleMissing(b));
   // Attach an illustrative photo per dish (Pexels, fetched in parallel, cached
   // in the row below). Fails open to no-image if PEXELS_API_KEY is unset.
   const dishes = await Promise.all(
     ranked
-      .slice(0, (quota?.suggestions_per_scan ?? 3) + 4)
+      .slice(0, 10)
       .map(async (d) => ({
         ...d,
         cookable_now: nonStapleMissing(d) === 0,

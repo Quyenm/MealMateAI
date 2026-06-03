@@ -256,9 +256,9 @@ export default function ScanPage() {
           {preview && (
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t.scan.yourPhoto}</span>
-              <div className="overflow-hidden rounded-2xl ring-1 ring-border">
+              <div className="mx-auto w-full max-w-lg overflow-hidden rounded-2xl ring-1 ring-border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt="" className="max-h-44 w-full object-cover" />
+                <img src={preview} alt="" className="aspect-[4/3] w-full object-cover" />
               </div>
             </div>
           )}

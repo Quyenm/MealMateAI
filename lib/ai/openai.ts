@@ -1,9 +1,10 @@
 import OpenAI from "openai";
 
 const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
-// Rough USD/token for cost tracking (gpt-4o tier). Used only for the spend circuit-breaker.
-const PRICE_IN = 2.5 / 1_000_000;
-const PRICE_OUT = 10 / 1_000_000;
+// USD/token for the spend circuit-breaker. Defaults to GPT-5.4 pricing
+// ($1.25 in / $7.50 out per 1M); override via env if the model changes.
+const PRICE_IN = Number(process.env.OPENAI_PRICE_IN_PER_1M ?? 1.25) / 1_000_000;
+const PRICE_OUT = Number(process.env.OPENAI_PRICE_OUT_PER_1M ?? 7.5) / 1_000_000;
 
 let _client: OpenAI | null = null;
 function client() {
@@ -44,7 +45,7 @@ const VISION_SYSTEM =
 const RECIPE_SYSTEM =
   "Bạn là công cụ gợi món ăn gia đình Việt Nam. Bạn nhận một JSON pantry (các nguyên liệu user ĐÃ xác nhận, mỗi món có thể có expiring:true) và prefs tùy chọn. " +
   "QUY TẮC: (1) chỉ gợi món Việt CÓ THẬT, phổ biến mà người Việt thực sự nấu (vd: trứng chiên cà chua, thịt kho tàu, canh chua cá, rau muống xào tỏi, đậu phụ sốt cà, thịt băm xào...). TUYỆT ĐỐI KHÔNG bịa món lạ hoặc ghép nguyên liệu kỳ quặc (KHÔNG 'salad cam đậu phụ', 'canh dừa thịt băm'...) — thà gợi ít món CHUẨN còn hơn nhiều món vô lý; (2) ưu tiên món nấu được NGAY chỉ dùng pantry + tối đa 2 gia vị cơ bản (muối, dầu ăn, nước mắm, đường, tiêu, nước) — liệt kê gia vị vào missing_ingredients. LUÔN cố gắng thêm 2-3 món 'gần nấu được' chỉ thiếu 1-2 nguyên liệu thường gặp (rau, thịt, trứng, gia vị phụ — ghi vào missing_ingredients) để user có nhiều lựa chọn; KHÔNG món nào thiếu quá 2 thứ ngoài gia vị; " +
-  "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả CÀNG NHIỀU món HỢP LÝ càng tốt — tới 7-8 món nếu pantry phong phú (nhiều nguyên liệu), ít hơn nếu pantry nghèo; chỉ KHÔNG bịa món vô lý để đủ số; xếp món nấu-ngay (không thiếu gì ngoài gia vị) lên trước, món gần-nấu-được xuống sau; (5) SONG NGỮ BẮT BUỘC cho mỗi món: title_vi + title_en (tên món); why_vi + why_en (lý do gợi, 1 câu ngắn); steps_vi + steps_en (các bước nấu ngắn gọn, dịch tương ứng nhau); missing_ingredients (tiếng Việt) + missing_ingredients_en (tiếng Anh, CÙNG thứ tự) — bản tiếng Anh phải dịch sát bản tiếng Việt, không bỏ trống; (6) nếu KHÔNG có món Việt nào hợp lý thì trả mảng dishes rỗng (không bịa); " +
+  "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả CÀNG NHIỀU món HỢP LÝ càng tốt — 5 tới 10 món nếu pantry phong phú (nhiều nguyên liệu), ít hơn nếu pantry nghèo; chỉ KHÔNG bịa món vô lý để đủ số; xếp món nấu-ngay (không thiếu gì ngoài gia vị) lên trước, món gần-nấu-được xuống sau; (5) SONG NGỮ BẮT BUỘC cho mỗi món: title_vi + title_en (tên món); why_vi + why_en (lý do gợi, 1 câu ngắn); steps_vi + steps_en (các bước nấu ngắn gọn, dịch tương ứng nhau); missing_ingredients (tiếng Việt) + missing_ingredients_en (tiếng Anh, CÙNG thứ tự) — bản tiếng Anh phải dịch sát bản tiếng Việt, không bỏ trống; (6) nếu KHÔNG có món Việt nào hợp lý thì trả mảng dishes rỗng (không bịa); " +
   "(7) prefs (nếu có): TUYỆT ĐỐI không gợi món chứa thứ trong allergies hoặc never_suggest; cố gắng hợp dietary_pref (none|keto|eat_clean|muscle_gain), spice_pref (mild|medium|hot) và cook_time_pref (5min|15min|30min_plus — ưu tiên món nấu trong khoảng thời gian đó); " +
   "(8) approx_macros: ước lượng dinh dưỡng THÔ cho MỘT phần ăn (kcal, protein_g, carbs_g, fat_g — số nguyên), không cần chính xác tuyệt đối.";
 
@@ -175,6 +176,6 @@ export async function suggestDishes(
     },
   });
   const parsed = parseJsonContent(res) as { dishes?: Dish[] };
-  const dishes = ((parsed.dishes ?? []) as Dish[]).slice(0, 8);
+  const dishes = ((parsed.dishes ?? []) as Dish[]).slice(0, 10);
   return { dishes, cost: costOf(res.usage) };
 }
