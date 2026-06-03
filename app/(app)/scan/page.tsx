@@ -12,6 +12,7 @@ import {
   PlayCircle,
   RefreshCw,
   Loader2,
+  ChevronLeft,
 } from "lucide-react";
 import { useT, useLang } from "@/components/landing/i18n";
 import { StarRating } from "@/components/star-rating";
@@ -74,7 +75,7 @@ export default function ScanPage() {
   const [ingredients, setIngredients] = useState<Ingredient[]>([]);
   const [newName, setNewName] = useState("");
   const [dishes, setDishes] = useState<Dish[]>([]);
-  const [openDish, setOpenDish] = useState<number | null>(0);
+  const [selectedDish, setSelectedDish] = useState<number | null>(null);
   const [scanId, setScanId] = useState<string | null>(null);
 
   const amountLabel = (a?: Ingredient["amount"]) =>
@@ -88,6 +89,7 @@ export default function ScanPage() {
   const dishSteps = (d: Dish) => (en ? d.steps_en || d.steps_vi || d.steps : d.steps_vi || d.steps) || [];
   const dishMissing = (d: Dish) =>
     (en ? d.missing_ingredients_en || d.missing_ingredients : d.missing_ingredients) || [];
+  const selected = selectedDish !== null ? dishes[selectedDish] : undefined;
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -168,7 +170,7 @@ export default function ScanPage() {
       const data = await res.json();
       setDishes(data.dishes ?? []);
       setScanId(data.scanId ?? null);
-      setOpenDish(0);
+      setSelectedDish(null);
       setStep("results");
       if (data.noMatch) {
         toast.message(t.scan.toast.noMatch, { description: t.scan.toast.noMatchDesc });
@@ -186,6 +188,7 @@ export default function ScanPage() {
     setIngredients([]);
     setDishes([]);
     setScanId(null);
+    setSelectedDish(null);
   }
 
   return (
@@ -256,9 +259,9 @@ export default function ScanPage() {
           {preview && (
             <div className="flex flex-col gap-1.5">
               <span className="text-xs font-medium text-muted-foreground">{t.scan.yourPhoto}</span>
-              <div className="mx-auto w-full max-w-lg overflow-hidden rounded-2xl ring-1 ring-border">
+              <div className="w-full overflow-hidden rounded-2xl ring-1 ring-border">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={preview} alt="" className="aspect-[4/3] w-full object-cover" />
+                <img src={preview} alt="" className="aspect-[16/10] w-full object-cover" />
               </div>
             </div>
           )}
@@ -321,98 +324,132 @@ export default function ScanPage() {
         </div>
       )}
 
-      {/* STEP: results */}
-      {step === "results" && (
+      {/* STEP: results — browse the suggested dishes */}
+      {step === "results" && selectedDish === null && (
         <div className="flex flex-col gap-3">
           {dishes.length === 0 && (
             <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
               {t.scan.resultsEmpty}
             </div>
           )}
-          <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
-          {dishes.map((d, i) => {
-            const open = openDish === i;
-            return (
-              <div key={i} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {dishes.map((d, i) => (
+              <button
+                key={i}
+                type="button"
+                onClick={() => setSelectedDish(i)}
+                className="group flex flex-col overflow-hidden rounded-3xl bg-card text-left shadow-card ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-float"
+              >
                 {d.image && (
-                  <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-muted">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={d.image.url} alt="" className="h-full w-full object-cover" />
-                    <a
-                      href={d.image.credit_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="absolute bottom-1.5 right-1.5 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
-                    >
-                      Pexels
-                    </a>
-                  </div>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setOpenDish(open ? null : i)}
-                  className="flex w-full flex-col gap-1.5 p-4 text-left"
-                >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold tracking-tight">{dishTitle(d)}</span>
-                      {d.cookable_now === false && (
-                        <span className="rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e]">
-                          {t.scan.almostBadge}
-                        </span>
-                      )}
-                    </div>
-                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warm-50 px-2 py-0.5 text-xs font-medium text-[#b85a2e]">
-                      <Clock className="size-3" />
-                      {d.cook_time_min}′ · {diffLabel(d.difficulty)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">{dishWhy(d)}</p>
-                </button>
-                {open && (
-                  <div className="flex flex-col gap-3 px-4 pb-4">
-                    {dishMissing(d).length > 0 && (
-                      <p className="text-xs text-muted-foreground">
-                        {t.scan.needMore}: {dishMissing(d).join(", ")}
-                      </p>
-                    )}
-                    {d.approx_macros && (
-                      <p className="text-xs text-muted-foreground">
-                        ≈ {d.approx_macros.kcal} {t.scan.kcalUnit} · {d.approx_macros.protein_g}g{" "}
-                        {t.scan.macroProtein} · {d.approx_macros.carbs_g}g {t.scan.macroCarbs} ·{" "}
-                        {d.approx_macros.fat_g}g {t.scan.macroFat}
-                      </p>
-                    )}
-                    <ol className="flex flex-col gap-2">
-                      {dishSteps(d).map((s, j) => (
-                        <li key={j} className="flex gap-2.5 text-sm">
-                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                            {j + 1}
-                          </span>
-                          <span className="pt-0.5">{s}</span>
-                        </li>
-                      ))}
-                    </ol>
-                    <a
-                      href={youtubeSearch(d.title_vi)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#ff0033]/10 px-4 py-2.5 text-sm font-semibold text-[#c8102e] transition hover:bg-[#ff0033]/15"
-                    >
-                      <PlayCircle className="size-[18px]" /> {t.scan.watchVideo}
-                    </a>
-                    {scanId && (
-                      <StarRating scanId={scanId} dishIndex={i} dishTitle={d.title_vi} />
+                    <img
+                      src={d.image.url}
+                      alt=""
+                      className="h-full w-full object-cover transition group-hover:scale-[1.03]"
+                    />
+                    {d.cookable_now === false && (
+                      <span className="absolute left-2 top-2 rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e] shadow-sm">
+                        {t.scan.almostBadge}
+                      </span>
                     )}
                   </div>
                 )}
-              </div>
-            );
-          })}
+                <div className="flex flex-1 flex-col gap-1.5 p-4">
+                  <span className="font-bold tracking-tight">{dishTitle(d)}</span>
+                  <span className="inline-flex w-fit items-center gap-1 rounded-full bg-warm-50 px-2 py-0.5 text-xs font-medium text-[#b85a2e]">
+                    <Clock className="size-3" />
+                    {d.cook_time_min}′ · {diffLabel(d.difficulty)}
+                  </span>
+                  <p className="line-clamp-2 text-sm text-muted-foreground">{dishWhy(d)}</p>
+                </div>
+              </button>
+            ))}
           </div>
           <Button variant="outline" onClick={reset}>
             <RefreshCw className="size-4" /> {t.scan.scanAgain}
           </Button>
+        </div>
+      )}
+
+      {/* STEP: results — the "cook this" detail screen */}
+      {step === "results" && selected && selectedDish !== null && (
+        <div className="mx-auto flex w-full max-w-2xl flex-col gap-3">
+          <button
+            type="button"
+            onClick={() => setSelectedDish(null)}
+            className="flex w-fit items-center gap-1 text-sm font-medium text-muted-foreground transition hover:text-foreground"
+          >
+            <ChevronLeft className="size-4" /> {t.scan.backToList}
+          </button>
+
+          <div className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+            {selected.image && (
+              <div className="relative aspect-[16/9] w-full overflow-hidden bg-muted">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={selected.image.url} alt="" className="h-full w-full object-cover" />
+                <a
+                  href={selected.image.credit_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-1.5 right-1.5 rounded bg-black/45 px-1.5 py-0.5 text-[10px] font-medium text-white/90 backdrop-blur-sm"
+                >
+                  Pexels
+                </a>
+              </div>
+            )}
+            <div className="flex flex-col gap-3 p-5">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-lg font-bold tracking-tight">{dishTitle(selected)}</h2>
+                  {selected.cookable_now === false && (
+                    <span className="rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e]">
+                      {t.scan.almostBadge}
+                    </span>
+                  )}
+                </div>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warm-50 px-2 py-0.5 text-xs font-medium text-[#b85a2e]">
+                  <Clock className="size-3" />
+                  {selected.cook_time_min}′ · {diffLabel(selected.difficulty)}
+                </span>
+              </div>
+              <p className="text-sm text-muted-foreground">{dishWhy(selected)}</p>
+              {dishMissing(selected).length > 0 && (
+                <p className="text-xs text-muted-foreground">
+                  {t.scan.needMore}: {dishMissing(selected).join(", ")}
+                </p>
+              )}
+              {selected.approx_macros && (
+                <p className="text-xs text-muted-foreground">
+                  ≈ {selected.approx_macros.kcal} {t.scan.kcalUnit} ·{" "}
+                  {selected.approx_macros.protein_g}g {t.scan.macroProtein} ·{" "}
+                  {selected.approx_macros.carbs_g}g {t.scan.macroCarbs} ·{" "}
+                  {selected.approx_macros.fat_g}g {t.scan.macroFat}
+                </p>
+              )}
+              <ol className="flex flex-col gap-2">
+                {dishSteps(selected).map((s, j) => (
+                  <li key={j} className="flex gap-2.5 text-sm">
+                    <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                      {j + 1}
+                    </span>
+                    <span className="pt-0.5">{s}</span>
+                  </li>
+                ))}
+              </ol>
+              <a
+                href={youtubeSearch(selected.title_vi)}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#ff0033]/10 px-4 py-2.5 text-sm font-semibold text-[#c8102e] transition hover:bg-[#ff0033]/15"
+              >
+                <PlayCircle className="size-[18px]" /> {t.scan.watchVideo}
+              </a>
+              {scanId && (
+                <StarRating scanId={scanId} dishIndex={selectedDish} dishTitle={selected.title_vi} />
+              )}
+            </div>
+          </div>
         </div>
       )}
     </main>

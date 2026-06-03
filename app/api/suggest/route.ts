@@ -103,7 +103,18 @@ export async function POST(req: Request) {
     });
   const sane = result.dishes.filter(usesPantry);
   const pool = sane.length ? sane : result.dishes;
-  const ranked = [...pool].sort((a, b) => nonStapleMissing(a) - nonStapleMissing(b));
+  // Protein/"meat" dishes first (accented match — avoids cá/cà, gà/gạo collisions).
+  const MEAT = ["thịt", "bò", "gà", "heo", "lợn", "cá", "tôm", "vịt", "cua", "mực", "trứng", "băm", "sườn", "nạc", "ba chỉ", "giò", "chả", "xúc xích", "ngao", "nghêu"];
+  const usesMeat = (d: (typeof result.dishes)[number]) =>
+    (d.uses_ingredients ?? []).some((u) => {
+      const u0 = u.toLowerCase();
+      return MEAT.some((m) => u0.includes(m));
+    });
+  const ranked = [...pool].sort(
+    (a, b) =>
+      nonStapleMissing(a) - nonStapleMissing(b) ||
+      (usesMeat(b) ? 1 : 0) - (usesMeat(a) ? 1 : 0),
+  );
   // Attach an illustrative photo per dish (Pexels, fetched in parallel, cached
   // in the row below). Fails open to no-image if PEXELS_API_KEY is unset.
   const dishes = await Promise.all(
