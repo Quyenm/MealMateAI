@@ -47,7 +47,8 @@ const RECIPE_SYSTEM =
   "QUY TẮC: (1) chỉ gợi món Việt CÓ THẬT, phổ biến mà người Việt thực sự nấu (vd: trứng chiên cà chua, thịt kho tàu, canh chua cá, rau muống xào tỏi, đậu phụ sốt cà, thịt băm xào...). TUYỆT ĐỐI KHÔNG bịa món lạ hoặc ghép nguyên liệu kỳ quặc (KHÔNG 'salad cam đậu phụ', 'canh dừa thịt băm'...) — thà gợi ít món CHUẨN còn hơn nhiều món vô lý; (2) ưu tiên món nấu được NGAY chỉ dùng pantry + tối đa 2 gia vị cơ bản (muối, dầu ăn, nước mắm, đường, tiêu, nước) — liệt kê gia vị vào missing_ingredients. LUÔN thêm NHIỀU món 'gần nấu được' (3-5 món) chỉ thiếu 1-3 nguyên liệu thường gặp (rau, thịt, trứng, gia vị phụ — ghi RÕ vào missing_ingredients để user biết cần mua gì), tạo nhiều lựa chọn 'mua thêm chút là nấu được'; KHÔNG món nào thiếu quá 3 thứ ngoài gia vị; " +
   "(3) nếu có nguyên liệu expiring:true thì ƯU TIÊN món dùng nó và nói rõ trong 'why'; (4) trả CÀNG NHIỀU món HỢP LÝ càng tốt — 5 tới 10 món nếu pantry phong phú (nhiều nguyên liệu), ít hơn nếu pantry nghèo; chỉ KHÔNG bịa món vô lý để đủ số; xếp món nấu-ngay (không thiếu gì ngoài gia vị) lên trước, món gần-nấu-được xuống sau; trong đó ƯU TIÊN món chính có thịt/cá/trứng (món mặn) lên trên, món rau/chay xuống dưới; (5) SONG NGỮ BẮT BUỘC cho mỗi món: title_vi + title_en (tên món); why_vi + why_en (lý do gợi, 1 câu ngắn); steps_vi + steps_en (các bước nấu ngắn gọn, dịch tương ứng nhau); missing_ingredients (tiếng Việt) + missing_ingredients_en (tiếng Anh, CÙNG thứ tự) — bản tiếng Anh phải dịch sát bản tiếng Việt, không bỏ trống; (6) nếu KHÔNG có món Việt nào hợp lý thì trả mảng dishes rỗng (không bịa); " +
   "(7) prefs (nếu có): TUYỆT ĐỐI không gợi món chứa thứ trong allergies hoặc never_suggest; cố gắng hợp dietary_pref (none|keto|eat_clean|muscle_gain), spice_pref (mild|medium|hot) và cook_time_pref (5min|15min|30min_plus — ưu tiên món nấu trong khoảng thời gian đó); " +
-  "(8) approx_macros: ước lượng dinh dưỡng THÔ cho MỘT phần ăn (kcal, protein_g, carbs_g, fat_g — số nguyên), không cần chính xác tuyệt đối.";
+  "(8) approx_macros: ước lượng dinh dưỡng THÔ cho MỘT phần ăn (kcal, protein_g, carbs_g, fat_g — số nguyên), không cần chính xác tuyệt đối; " +
+  "(9) CÁ NHÂN HOÁ (nếu input có): 'liked' = các món user từng thích — ưu tiên gợi món cùng phong cách/nhóm khi hợp pantry; 'avoid_repeat' = món vừa gợi gần đây — cố gắng đa dạng, ĐỪNG lặp lại y hệt.";
 
 const INGREDIENTS_SCHEMA = {
   type: "object",
@@ -163,12 +164,21 @@ export async function recognizeIngredients(imageDataUrl: string) {
 export async function suggestDishes(
   pantry: Ingredient[],
   prefs?: Record<string, unknown>,
+  extra?: { liked?: string[]; recent?: string[] },
 ) {
   const res = await client().chat.completions.create({
     model: MODEL,
     messages: [
       { role: "system", content: RECIPE_SYSTEM },
-      { role: "user", content: JSON.stringify({ pantry, prefs: prefs ?? {} }) },
+      {
+        role: "user",
+        content: JSON.stringify({
+          pantry,
+          prefs: prefs ?? {},
+          liked: extra?.liked ?? [],
+          avoid_repeat: extra?.recent ?? [],
+        }),
+      },
     ],
     response_format: {
       type: "json_schema",

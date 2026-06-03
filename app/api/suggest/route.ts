@@ -55,12 +55,37 @@ export async function POST(req: Request) {
   }
   const ingredients = parsed.data.ingredients as Ingredient[];
 
-  // Personalize from the user's saved taste (read server-side, not client-trusted).
-  const { data: prefs } = await supabase
-    .from("profiles")
-    .select("dietary_pref, cook_time_pref, spice_pref, allergies, never_suggest")
-    .eq("id", user.id)
-    .single();
+  // Personalize: saved taste + dishes the user rated highly (lean toward them) +
+  // recently-suggested dishes (push for variety). All read server-side.
+  const [{ data: prefs }, { data: liked }, { data: recentSug }] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select("dietary_pref, cook_time_pref, spice_pref, allergies, never_suggest")
+      .eq("id", user.id)
+      .single(),
+    supabase
+      .from("ratings")
+      .select("dish_title")
+      .eq("user_id", user.id)
+      .gte("stars", 4)
+      .order("created_at", { ascending: false })
+      .limit(12),
+    supabase
+      .from("suggestions")
+      .select("dishes")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(3),
+  ]);
+  const likedTitles = [...new Set((liked ?? []).map((r) => r.dish_title).filter(Boolean))].slice(0, 10);
+  const recentTitles = [
+    ...new Set(
+      (recentSug ?? []).flatMap((s) => {
+        const arr = Array.isArray(s.dishes) ? (s.dishes as { title_vi?: string }[]) : [];
+        return arr.map((d) => d?.title_vi).filter((x): x is string => !!x);
+      }),
+    ),
+  ].slice(0, 15);
 
   // Quota pre-check (no token spend if already at the limit).
   const quota = await getQuota(user.id);
@@ -73,7 +98,10 @@ export async function POST(req: Request) {
 
   let result;
   try {
-    result = await suggestDishes(ingredients, prefs ?? parsed.data.prefs);
+    result = await suggestDishes(ingredients, prefs ?? parsed.data.prefs, {
+      liked: likedTitles,
+      recent: recentTitles,
+    });
     await recordSpend(result.cost);
   } catch (e) {
     console.error("/api/suggest failed", e);
