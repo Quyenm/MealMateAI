@@ -3,11 +3,27 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import {
+  Camera,
+  Flame,
+  X,
+  Plus,
+  Clock,
+  PlayCircle,
+  RefreshCw,
+  Loader2,
+} from "lucide-react";
+import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-type Ingredient = { name_vi: string; name_en?: string; confidence?: number; expiring?: boolean };
+type Ingredient = {
+  name_vi: string;
+  name_en?: string;
+  confidence?: number;
+  expiring?: boolean;
+  amount?: "low" | "medium" | "high";
+};
 type Dish = {
   title_vi: string;
   title_en: string;
@@ -32,8 +48,13 @@ async function downscale(file: File, maxEdge = 1024, quality = 0.7): Promise<str
   return canvas.toDataURL("image/jpeg", quality);
 }
 
+function youtubeSearch(query: string) {
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent("cách làm " + query)}`;
+}
+
 export default function ScanPage() {
   const router = useRouter();
+  const t = useT();
   const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>("capture");
   const [preview, setPreview] = useState<string | null>(null);
@@ -43,6 +64,11 @@ export default function ScanPage() {
   const [dishes, setDishes] = useState<Dish[]>([]);
   const [openDish, setOpenDish] = useState<number | null>(0);
 
+  const amountLabel = (a?: Ingredient["amount"]) =>
+    a === "low" ? t.scan.amountLow : a === "medium" ? t.scan.amountMedium : a === "high" ? t.scan.amountHigh : null;
+  const diffLabel = (d: Dish["difficulty"]) =>
+    d === "easy" ? t.scan.diffEasy : d === "hard" ? t.scan.diffHard : t.scan.diffMedium;
+
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -51,7 +77,7 @@ export default function ScanPage() {
       setImageData(data);
       setPreview(data);
     } catch {
-      toast.error("Không đọc được ảnh, thử ảnh khác");
+      toast.error(t.scan.toast.imgError);
     }
   }
 
@@ -65,13 +91,13 @@ export default function ScanPage() {
         body: JSON.stringify({ imageDataUrl: imageData }),
       });
       if (res.status === 422) {
-        toast.message("Không nhận ra nguyên liệu", { description: "Thêm tay bên dưới nhé." });
+        toast.message(t.scan.toast.noRecognize, { description: t.scan.toast.noRecognizeDesc });
         setIngredients([]);
         setStep("confirm");
         return;
       }
       if (!res.ok) {
-        toast.error(res.status === 503 ? "Hệ thống đang bận, thử lại sau" : "Lỗi nhận diện, thử lại");
+        toast.error(res.status === 503 ? t.scan.toast.busy : t.scan.toast.recognizeErr);
         setStep("capture");
         return;
       }
@@ -79,7 +105,7 @@ export default function ScanPage() {
       setIngredients((data.ingredients ?? []).map((g: Ingredient) => ({ ...g, expiring: false })));
       setStep("confirm");
     } catch {
-      toast.error("Lỗi mạng, thử lại");
+      toast.error(t.scan.toast.netErr);
       setStep("capture");
     }
   }
@@ -99,7 +125,7 @@ export default function ScanPage() {
 
   async function getSuggestions() {
     if (!ingredients.length) {
-      toast.error("Thêm ít nhất 1 nguyên liệu");
+      toast.error(t.scan.toast.needOne);
       return;
     }
     setStep("suggesting");
@@ -110,12 +136,12 @@ export default function ScanPage() {
         body: JSON.stringify({ ingredients }),
       });
       if (res.status === 402) {
-        toast.error("Hết lượt quét hôm nay", { description: "Quay lại mai hoặc nâng gói." });
+        toast.error(t.scan.toast.quotaOut, { description: t.scan.toast.quotaOutDesc });
         router.push("/upgrade");
         return;
       }
       if (!res.ok) {
-        toast.error(res.status === 503 ? "Hệ thống đang bận" : "Lỗi gợi món, thử lại");
+        toast.error(res.status === 503 ? t.scan.toast.busyShort : t.scan.toast.suggestErr);
         setStep("confirm");
         return;
       }
@@ -124,10 +150,10 @@ export default function ScanPage() {
       setOpenDish(0);
       setStep("results");
       if (data.noMatch) {
-        toast.message("Chưa có món nấu được", { description: "Thử thêm nguyên liệu rồi quét lại." });
+        toast.message(t.scan.toast.noMatch, { description: t.scan.toast.noMatchDesc });
       }
     } catch {
-      toast.error("Lỗi mạng, thử lại");
+      toast.error(t.scan.toast.netErr);
       setStep("confirm");
     }
   }
@@ -142,148 +168,195 @@ export default function ScanPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-4 p-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-lg font-semibold">Chụp tủ lạnh</h1>
-        <Button variant="ghost" size="sm" onClick={() => router.push("/home")}>
-          Trang chủ
-        </Button>
-      </div>
+      <h1 className="text-xl font-bold tracking-tight">{t.scan.title}</h1>
 
       {/* STEP: capture */}
       {step === "capture" && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-4 pt-6">
-            {preview ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={preview} alt="preview" className="max-h-64 rounded-lg object-contain" />
-            ) : (
-              <p className="text-center text-sm text-muted-foreground">
-                Chụp/chọn ảnh tủ lạnh hay đống nguyên liệu — đủ sáng, rõ là được.
-              </p>
-            )}
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              capture="environment"
-              className="hidden"
-              onChange={onPick}
-            />
-            <Button variant="outline" className="w-full" onClick={() => fileRef.current?.click()}>
-              {preview ? "Chọn ảnh khác" : "Chụp / chọn ảnh"}
+        <div className="flex flex-col gap-4 rounded-3xl bg-card p-6 shadow-card ring-1 ring-border/60">
+          {preview ? (
+            <div className="overflow-hidden rounded-2xl ring-1 ring-border">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={preview} alt="" className="max-h-72 w-full object-cover" />
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 py-6 text-center">
+              <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+                <Camera className="size-7" />
+              </span>
+              <p className="max-w-xs text-sm text-muted-foreground">{t.scan.captureHint}</p>
+            </div>
+          )}
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            className="hidden"
+            onChange={onPick}
+          />
+          <Button
+            variant={preview ? "outline" : "default"}
+            className={preview ? "w-full" : "w-full shadow-float"}
+            onClick={() => fileRef.current?.click()}
+          >
+            <Camera className="size-5" />
+            {preview ? t.scan.pickAnother : t.scan.pick}
+          </Button>
+          {preview && (
+            <Button className="w-full shadow-float" onClick={analyze}>
+              {t.scan.analyze}
             </Button>
-            {preview && (
-              <Button className="w-full" onClick={analyze}>
-                Phân tích ảnh
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </div>
       )}
 
       {/* STEP: loading */}
       {(step === "recognizing" || step === "suggesting") && (
-        <Card>
-          <CardContent className="flex flex-col items-center gap-3 py-10">
-            <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted border-t-foreground" />
-            <p className="text-sm text-muted-foreground">
-              {step === "recognizing" ? "Đang nhận diện nguyên liệu…" : "Đang tìm món nấu được…"}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center gap-4 rounded-3xl bg-card p-10 shadow-card ring-1 ring-border/60">
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <Loader2 className="size-7 animate-spin" />
+          </span>
+          <p className="text-sm font-medium text-muted-foreground">
+            {step === "recognizing" ? t.scan.recognizing : t.scan.suggesting}
+          </p>
+        </div>
       )}
 
-      {/* STEP: confirm ingredients */}
+      {/* STEP: confirm */}
       {step === "confirm" && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Xác nhận nguyên liệu</CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Xoá món sai, thêm món thiếu. Bấm 🔥 vào món sắp hỏng để ưu tiên.
-            </p>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4">
-            <div className="flex flex-wrap gap-2">
-              {ingredients.map((g, i) => (
-                <span
-                  key={i}
-                  className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-sm ${
-                    g.expiring ? "border-orange-400 bg-orange-50" : "border-border"
+        <div className="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+          <div>
+            <h2 className="font-bold tracking-tight">{t.scan.confirmTitle}</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">{t.scan.confirmHint}</p>
+          </div>
+
+          {/* photo to cross-check against (client-side only — never stored) */}
+          {preview && (
+            <div className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-muted-foreground">{t.scan.yourPhoto}</span>
+              <div className="overflow-hidden rounded-2xl ring-1 ring-border">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={preview} alt="" className="max-h-44 w-full object-cover" />
+              </div>
+            </div>
+          )}
+
+          <div className="flex flex-wrap gap-2">
+            {ingredients.map((g, i) => (
+              <span
+                key={i}
+                className={`inline-flex items-center gap-1.5 rounded-full border py-1 pl-1 pr-2 text-sm transition ${
+                  g.expiring
+                    ? "border-warm-400/70 bg-warm-50 text-[#8a4b25]"
+                    : "border-border bg-background"
+                }`}
+              >
+                <button
+                  type="button"
+                  title={t.scan.expiring}
+                  aria-label={t.scan.expiring}
+                  onClick={() => toggleExpiring(i)}
+                  className={`flex size-6 items-center justify-center rounded-full transition ${
+                    g.expiring ? "text-[#ef6c3a]" : "text-muted-foreground/40 hover:text-muted-foreground"
                   }`}
                 >
-                  <button
-                    type="button"
-                    title="Sắp hỏng"
-                    onClick={() => toggleExpiring(i)}
-                    className={g.expiring ? "" : "opacity-40"}
-                  >
-                    🔥
-                  </button>
-                  {g.name_vi}
-                  <button type="button" onClick={() => removeAt(i)} className="ml-0.5 text-muted-foreground">
-                    ✕
-                  </button>
-                </span>
-              ))}
-              {!ingredients.length && (
-                <p className="text-sm text-muted-foreground">Chưa có nguyên liệu nào — thêm bên dưới.</p>
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                value={newName}
-                onChange={(e) => setNewName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addIngredient())}
-                placeholder="Thêm nguyên liệu…"
-              />
-              <Button variant="outline" onClick={addIngredient}>
-                Thêm
-              </Button>
-            </div>
-            <Button onClick={getSuggestions}>Gợi món ({ingredients.length})</Button>
-          </CardContent>
-        </Card>
+                  <Flame className="size-4" fill={g.expiring ? "currentColor" : "none"} />
+                </button>
+                <span className="font-medium">{g.name_vi}</span>
+                {amountLabel(g.amount) && (
+                  <span className="text-xs text-muted-foreground">· {amountLabel(g.amount)}</span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removeAt(i)}
+                  aria-label="remove"
+                  className="ml-0.5 text-muted-foreground/60 hover:text-foreground"
+                >
+                  <X className="size-3.5" />
+                </button>
+              </span>
+            ))}
+            {!ingredients.length && (
+              <p className="text-sm text-muted-foreground">{t.scan.emptyIngredients}</p>
+            )}
+          </div>
+
+          <div className="flex gap-2">
+            <Input
+              value={newName}
+              onChange={(e) => setNewName(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addIngredient())}
+              placeholder={t.scan.addPlaceholder}
+            />
+            <Button variant="outline" size="icon" onClick={addIngredient} aria-label={t.scan.add}>
+              <Plus className="size-5" />
+            </Button>
+          </div>
+
+          <Button className="shadow-float" onClick={getSuggestions}>
+            {t.scan.suggest} ({ingredients.length})
+          </Button>
+        </div>
       )}
 
       {/* STEP: results */}
       {step === "results" && (
         <div className="flex flex-col gap-3">
           {dishes.length === 0 && (
-            <Card>
-              <CardContent className="py-8 text-center text-sm text-muted-foreground">
-                Chưa nấu được món nào với mấy nguyên liệu này. Thêm vài thứ rồi quét lại nhé.
-              </CardContent>
-            </Card>
+            <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+              {t.scan.resultsEmpty}
+            </div>
           )}
-          {dishes.map((d, i) => (
-            <Card key={i}>
-              <CardHeader className="cursor-pointer" onClick={() => setOpenDish(openDish === i ? null : i)}>
-                <CardTitle className="flex items-center justify-between text-base">
-                  <span>{d.title_vi}</span>
-                  <span className="text-xs font-normal text-muted-foreground">
-                    {d.cook_time_min}&apos; · {d.difficulty}
-                  </span>
-                </CardTitle>
-                <p className="text-sm text-muted-foreground">{d.why}</p>
-              </CardHeader>
-              {openDish === i && (
-                <CardContent className="flex flex-col gap-3">
-                  {d.missing_ingredients?.length > 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Cần thêm: {d.missing_ingredients.join(", ")}
-                    </p>
-                  )}
-                  <ol className="list-decimal space-y-1 pl-5 text-sm">
-                    {d.steps.map((s, j) => (
-                      <li key={j}>{s}</li>
-                    ))}
-                  </ol>
-                </CardContent>
-              )}
-            </Card>
-          ))}
+          {dishes.map((d, i) => {
+            const open = openDish === i;
+            return (
+              <div key={i} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+                <button
+                  type="button"
+                  onClick={() => setOpenDish(open ? null : i)}
+                  className="flex w-full flex-col gap-1.5 p-4 text-left"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <span className="font-bold tracking-tight">{d.title_vi}</span>
+                    <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-warm-50 px-2 py-0.5 text-xs font-medium text-[#b85a2e]">
+                      <Clock className="size-3" />
+                      {d.cook_time_min}′ · {diffLabel(d.difficulty)}
+                    </span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{d.why}</p>
+                </button>
+                {open && (
+                  <div className="flex flex-col gap-3 px-4 pb-4">
+                    {d.missing_ingredients?.length > 0 && (
+                      <p className="text-xs text-muted-foreground">
+                        {t.scan.needMore}: {d.missing_ingredients.join(", ")}
+                      </p>
+                    )}
+                    <ol className="flex flex-col gap-2">
+                      {d.steps.map((s, j) => (
+                        <li key={j} className="flex gap-2.5 text-sm">
+                          <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                            {j + 1}
+                          </span>
+                          <span className="pt-0.5">{s}</span>
+                        </li>
+                      ))}
+                    </ol>
+                    <a
+                      href={youtubeSearch(d.title_vi)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#ff0033]/10 px-4 py-2.5 text-sm font-semibold text-[#c8102e] transition hover:bg-[#ff0033]/15"
+                    >
+                      <PlayCircle className="size-[18px]" /> {t.scan.watchVideo}
+                    </a>
+                  </div>
+                )}
+              </div>
+            );
+          })}
           <Button variant="outline" onClick={reset}>
-            Quét lần nữa
+            <RefreshCw className="size-4" /> {t.scan.scanAgain}
           </Button>
         </div>
       )}
