@@ -60,3 +60,6 @@ logo_company.jpg
 # local dev/prod server logs + review screenshots (scratch, not product assets)
 *.log
 screenshot/
+
+# local screenshot scratch
+.shots/

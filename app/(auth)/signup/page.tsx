@@ -5,20 +5,14 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
+import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 
 export default function SignupPage() {
   const router = useRouter();
+  const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,7 +20,7 @@ export default function SignupPage() {
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     if (password.length < 6) {
-      toast.error("Mật khẩu cần ít nhất 6 ký tự");
+      toast.error(t.auth.pwTooShort);
       return;
     }
     setLoading(true);
@@ -38,7 +32,7 @@ export default function SignupPage() {
     });
     setLoading(false);
     if (error) {
-      toast.error("Đăng ký thất bại", { description: error.message });
+      toast.error(t.auth.signupFail, { description: error.message });
       return;
     }
     if (data.session) {
@@ -46,7 +40,7 @@ export default function SignupPage() {
       router.refresh();
       router.push("/home");
     } else {
-      toast.success("Kiểm tra email để xác nhận tài khoản nhé!");
+      toast.success(t.auth.checkEmail);
       router.push("/login");
     }
   }
@@ -57,62 +51,60 @@ export default function SignupPage() {
       provider: "google",
       options: { redirectTo: `${window.location.origin}/auth/callback` },
     });
-    if (error) toast.error("Không mở được Google", { description: error.message });
+    if (error) toast.error(t.auth.googleFail, { description: error.message });
   }
 
   return (
-    <main className="flex flex-1 flex-col items-center justify-center gap-6 p-4">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src="/logo.jpg" alt="MealMate AI" className="h-20 w-20 rounded-2xl shadow-sm" />
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle>Đăng ký</CardTitle>
-          <CardDescription>Tạo tài khoản MealMate AI miễn phí.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSignup} className="flex flex-col gap-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="ban@email.com"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="password">Mật khẩu</Label>
-              <Input
-                id="password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="ít nhất 6 ký tự"
-              />
-            </div>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Đang tạo..." : "Đăng ký"}
-            </Button>
-          </form>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-3 w-full"
-            onClick={handleGoogle}
-          >
-            Tiếp tục với Google
-          </Button>
-        </CardContent>
-        <CardFooter className="justify-center text-sm text-muted-foreground">
-          Đã có tài khoản?&nbsp;
-          <Link href="/login" className="font-medium text-foreground underline">
-            Đăng nhập
-          </Link>
-        </CardFooter>
-      </Card>
-    </main>
+    <div className="w-full max-w-md rounded-3xl bg-white p-7 shadow-card ring-1 ring-white/60 sm:p-8">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl font-bold tracking-tight">{t.auth.signupTitle}</h1>
+        <p className="text-sm text-muted-foreground">{t.auth.signupSub}</p>
+      </div>
+
+      <form onSubmit={handleSignup} className="mt-6 flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="email">{t.auth.email}</Label>
+          <Input
+            id="email"
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="ban@email.com"
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="password">{t.auth.password}</Label>
+          <Input
+            id="password"
+            type="password"
+            required
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder={t.auth.passwordHint}
+          />
+        </div>
+        <Button type="submit" disabled={loading} className="shadow-float">
+          {loading ? t.auth.signupLoading : t.auth.signupCta}
+        </Button>
+      </form>
+
+      <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">
+        <span className="h-px flex-1 bg-border" />
+        {t.auth.or}
+        <span className="h-px flex-1 bg-border" />
+      </div>
+
+      <Button type="button" variant="outline" className="w-full" onClick={handleGoogle}>
+        {t.auth.googleCta}
+      </Button>
+
+      <p className="mt-6 text-center text-sm text-muted-foreground">
+        {t.auth.haveAccount}{" "}
+        <Link href="/login" className="font-semibold text-primary hover:underline">
+          {t.auth.loginLink}
+        </Link>
+      </p>
+    </div>
   );
 }
