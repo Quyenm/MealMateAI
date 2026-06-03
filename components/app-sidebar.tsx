@@ -55,7 +55,7 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
       </nav>
 
       <div className="flex items-center justify-between gap-2 border-t border-border px-4 py-3">
-        <LangSwitcher direction="up" />
+        <LangSwitcher direction="up" align="left" />
         <SignOutButton />
       </div>
     </aside>

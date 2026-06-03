@@ -10,9 +10,11 @@ const LANGS: Lang[] = ["vi", "en"];
 export function LangSwitcher({
   className = "",
   direction = "down",
+  align = "right",
 }: {
   className?: string;
   direction?: "up" | "down";
+  align?: "left" | "right";
 }) {
   const { lang, setLang } = useLang();
   const t = useT();
@@ -40,9 +42,9 @@ export function LangSwitcher({
       </button>
       {open && (
         <div
-          className={`absolute right-0 z-50 w-40 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-float ${
-            direction === "up" ? "bottom-full mb-2" : "mt-2"
-          }`}
+          className={`absolute z-50 w-40 overflow-hidden rounded-xl border border-border bg-popover p-1 shadow-float ${
+            align === "left" ? "left-0" : "right-0"
+          } ${direction === "up" ? "bottom-full mb-2" : "mt-2"}`}
         >
           {LANGS.map((l) => (
             <button
