@@ -12,7 +12,8 @@ type Quota = { tier: string; used: number; scan_limit: number; remaining: number
 type RecentScan = {
   id: string;
   created_at: string;
-  suggestions: { dishes: { title_vi: string; title_en?: string }[] }[];
+  // suggestions.scan_id is UNIQUE → embedded as a single object, not an array.
+  suggestions: { dishes: { title_vi: string; title_en?: string }[] } | null;
 };
 
 export default async function HomePage() {
@@ -119,7 +120,7 @@ export default async function HomePage() {
           ) : (
             <div className="grid gap-2 sm:grid-cols-2">
               {recent.map((s) => {
-                const titles = (s.suggestions?.[0]?.dishes ?? [])
+                const titles = (s.suggestions?.dishes ?? [])
                   .slice(0, 3)
                   .map((d) => (en && d.title_en ? d.title_en : d.title_vi))
                   .join(" · ");
@@ -131,7 +132,9 @@ export default async function HomePage() {
                   >
                     <p className="line-clamp-1 text-sm font-medium">{titles || t.noDish}</p>
                     <p className="text-xs text-muted-foreground">
-                      {new Date(s.created_at).toLocaleString(dateLocale)}
+                      {new Date(s.created_at).toLocaleString(dateLocale, {
+                        timeZone: "Asia/Ho_Chi_Minh",
+                      })}
                     </p>
                   </Link>
                 );

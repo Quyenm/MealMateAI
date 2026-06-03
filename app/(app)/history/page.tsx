@@ -28,7 +28,8 @@ type Scan = {
   id: string;
   created_at: string;
   scan_ingredients: { name_vi: string | null }[];
-  suggestions: { dishes: Dish[] }[];
+  // suggestions.scan_id is UNIQUE, so PostgREST embeds it as a single object (not an array).
+  suggestions: { dishes: Dish[] } | null;
 };
 
 export default async function HistoryPage() {
@@ -77,14 +78,14 @@ export default async function HistoryPage() {
       <div className="grid gap-3 lg:grid-cols-2 lg:items-start">
       {scans.map((sc) => {
         const ingredients = sc.scan_ingredients.map((g) => g.name_vi).filter(Boolean);
-        const dishes = sc.suggestions?.[0]?.dishes ?? [];
+        const dishes = sc.suggestions?.dishes ?? [];
         return (
           <div
             key={sc.id}
             className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
           >
             <p className="text-xs font-medium text-muted-foreground">
-              {new Date(sc.created_at).toLocaleString(dateLocale)}
+              {new Date(sc.created_at).toLocaleString(dateLocale, { timeZone: "Asia/Ho_Chi_Minh" })}
             </p>
             <p className="text-sm">
               <span className="text-muted-foreground">{t.ingredients}: </span>
