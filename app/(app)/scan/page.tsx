@@ -13,7 +13,7 @@ import {
   RefreshCw,
   Loader2,
 } from "lucide-react";
-import { useT } from "@/components/landing/i18n";
+import { useT, useLang } from "@/components/landing/i18n";
 import { StarRating } from "@/components/star-rating";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -33,8 +33,13 @@ type Dish = {
   difficulty: "easy" | "medium" | "hard";
   uses_ingredients: string[];
   missing_ingredients: string[];
-  why: string;
-  steps: string[];
+  missing_ingredients_en?: string[];
+  why_vi?: string;
+  why_en?: string;
+  steps_vi?: string[];
+  steps_en?: string[];
+  why?: string; // legacy (pre-bilingual rows)
+  steps?: string[];
   approx_macros?: Macros;
   cookable_now?: boolean;
   image?: { url: string; photographer: string; credit_url: string };
@@ -60,6 +65,8 @@ function youtubeSearch(query: string) {
 export default function ScanPage() {
   const router = useRouter();
   const t = useT();
+  const { lang } = useLang();
+  const en = lang === "en";
   const fileRef = useRef<HTMLInputElement>(null);
   const [step, setStep] = useState<Step>("capture");
   const [preview, setPreview] = useState<string | null>(null);
@@ -74,6 +81,13 @@ export default function ScanPage() {
     a === "low" ? t.scan.amountLow : a === "medium" ? t.scan.amountMedium : a === "high" ? t.scan.amountHigh : null;
   const diffLabel = (d: Dish["difficulty"]) =>
     d === "easy" ? t.scan.diffEasy : d === "hard" ? t.scan.diffHard : t.scan.diffMedium;
+  // Pick the right language for AI-generated content (falls back to vi / legacy).
+  const ingName = (g: Ingredient) => (en && g.name_en ? g.name_en : g.name_vi);
+  const dishTitle = (d: Dish) => (en && d.title_en ? d.title_en : d.title_vi);
+  const dishWhy = (d: Dish) => (en ? d.why_en || d.why_vi || d.why : d.why_vi || d.why) || "";
+  const dishSteps = (d: Dish) => (en ? d.steps_en || d.steps_vi || d.steps : d.steps_vi || d.steps) || [];
+  const dishMissing = (d: Dish) =>
+    (en ? d.missing_ingredients_en || d.missing_ingredients : d.missing_ingredients) || [];
 
   async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -270,7 +284,7 @@ export default function ScanPage() {
                 >
                   <Flame className="size-4" fill={g.expiring ? "currentColor" : "none"} />
                 </button>
-                <span className="font-medium">{g.name_vi}</span>
+                <span className="font-medium">{ingName(g)}</span>
                 {amountLabel(g.amount) && (
                   <span className="text-xs text-muted-foreground">· {amountLabel(g.amount)}</span>
                 )}
@@ -341,7 +355,7 @@ export default function ScanPage() {
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold tracking-tight">{d.title_vi}</span>
+                      <span className="font-bold tracking-tight">{dishTitle(d)}</span>
                       {d.cookable_now === false && (
                         <span className="rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e]">
                           {t.scan.almostBadge}
@@ -353,13 +367,13 @@ export default function ScanPage() {
                       {d.cook_time_min}′ · {diffLabel(d.difficulty)}
                     </span>
                   </div>
-                  <p className="text-sm text-muted-foreground">{d.why}</p>
+                  <p className="text-sm text-muted-foreground">{dishWhy(d)}</p>
                 </button>
                 {open && (
                   <div className="flex flex-col gap-3 px-4 pb-4">
-                    {d.missing_ingredients?.length > 0 && (
+                    {dishMissing(d).length > 0 && (
                       <p className="text-xs text-muted-foreground">
-                        {t.scan.needMore}: {d.missing_ingredients.join(", ")}
+                        {t.scan.needMore}: {dishMissing(d).join(", ")}
                       </p>
                     )}
                     {d.approx_macros && (
@@ -370,7 +384,7 @@ export default function ScanPage() {
                       </p>
                     )}
                     <ol className="flex flex-col gap-2">
-                      {d.steps.map((s, j) => (
+                      {dishSteps(d).map((s, j) => (
                         <li key={j} className="flex gap-2.5 text-sm">
                           <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                             {j + 1}

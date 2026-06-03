@@ -9,7 +9,11 @@ import { STR } from "@/lib/i18n/strings";
 export const dynamic = "force-dynamic";
 
 type Quota = { tier: string; used: number; scan_limit: number; remaining: number };
-type RecentScan = { id: string; created_at: string; suggestions: { dishes: { title_vi: string }[] }[] };
+type RecentScan = {
+  id: string;
+  created_at: string;
+  suggestions: { dishes: { title_vi: string; title_en?: string }[] }[];
+};
 
 export default async function HomePage() {
   // Deduped with the (app) layout's nav via React cache() — one auth round-trip.
@@ -40,6 +44,7 @@ export default async function HomePage() {
   const remainingPct = limit > 0 ? Math.max(0, Math.round((remaining / limit) * 100)) : 0;
   const recent = (rData ?? []) as unknown as RecentScan[];
   const dateLocale = locale === "en" ? "en-US" : "vi-VN";
+  const en = locale === "en";
 
   return (
     <main className="mx-auto w-full max-w-5xl p-4 lg:p-8">
@@ -116,7 +121,7 @@ export default async function HomePage() {
               {recent.map((s) => {
                 const titles = (s.suggestions?.[0]?.dishes ?? [])
                   .slice(0, 3)
-                  .map((d) => d.title_vi)
+                  .map((d) => (en && d.title_en ? d.title_en : d.title_vi))
                   .join(" · ");
                 return (
                   <Link

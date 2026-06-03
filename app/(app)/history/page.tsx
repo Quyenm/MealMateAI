@@ -12,8 +12,13 @@ export const dynamic = "force-dynamic";
 type Macros = { kcal: number; protein_g: number; carbs_g: number; fat_g: number };
 type Dish = {
   title_vi: string;
+  title_en?: string;
   cook_time_min: number;
-  why?: string;
+  why_vi?: string;
+  why_en?: string;
+  steps_vi?: string[];
+  steps_en?: string[];
+  why?: string; // legacy
   steps?: string[];
   approx_macros?: Macros;
   cookable_now?: boolean;
@@ -37,6 +42,10 @@ export default async function HistoryPage() {
   const s = STR[locale];
   const t = s.history;
   const dateLocale = locale === "en" ? "en-US" : "vi-VN";
+  const en = locale === "en";
+  const dTitle = (d: Dish) => (en && d.title_en ? d.title_en : d.title_vi);
+  const dWhy = (d: Dish) => (en ? d.why_en || d.why_vi || d.why : d.why_vi || d.why) || "";
+  const dSteps = (d: Dish) => (en ? d.steps_en || d.steps_vi || d.steps : d.steps_vi || d.steps) || [];
 
   const [{ data }, { data: ratingRows }] = await Promise.all([
     supabase
@@ -86,7 +95,7 @@ export default async function HistoryPage() {
                 <details key={i} className="group rounded-xl bg-background p-3 ring-1 ring-border/60">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium">
                     <span>
-                      {d.title_vi}
+                      {dTitle(d)}
                       <span className="ml-1 font-normal text-muted-foreground">
                         · {d.cook_time_min}′
                       </span>
@@ -107,7 +116,7 @@ export default async function HistoryPage() {
                       </a>
                     </div>
                   )}
-                  {d.why && <p className="mt-2 text-xs text-muted-foreground">{d.why}</p>}
+                  {dWhy(d) && <p className="mt-2 text-xs text-muted-foreground">{dWhy(d)}</p>}
                   {d.approx_macros && (
                     <p className="mt-1 text-xs text-muted-foreground">
                       ≈ {d.approx_macros.kcal} {s.scan.kcalUnit} · {d.approx_macros.protein_g}g{" "}
@@ -115,9 +124,9 @@ export default async function HistoryPage() {
                       {d.approx_macros.fat_g}g {s.scan.macroFat}
                     </p>
                   )}
-                  {d.steps && d.steps.length > 0 && (
+                  {dSteps(d).length > 0 && (
                     <ol className="mt-2 flex flex-col gap-1.5">
-                      {d.steps.map((st, j) => (
+                      {dSteps(d).map((st, j) => (
                         <li key={j} className="flex gap-2 text-sm">
                           <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                             {j + 1}

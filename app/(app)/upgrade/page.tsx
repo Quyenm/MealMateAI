@@ -71,7 +71,9 @@ export default async function UpgradePage() {
             )}
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="font-bold tracking-tight">{tier.display_label}</p>
+                <p className="font-bold tracking-tight">
+                  {tier.price_vnd === 0 ? t.free : tier.display_label}
+                </p>
                 <p className="mt-0.5 text-lg font-extrabold">
                   {vnd(tier.price_vnd)}
                   {tier.price_vnd > 0 && (
