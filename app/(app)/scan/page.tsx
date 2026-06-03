@@ -362,6 +362,11 @@ export default function ScanPage() {
                     {d.cook_time_min}′ · {diffLabel(d.difficulty)}
                   </span>
                   <p className="line-clamp-2 text-sm text-muted-foreground">{dishWhy(d)}</p>
+                  {d.cookable_now === false && dishMissing(d).length > 0 && (
+                    <p className="line-clamp-1 text-xs font-medium text-[#b85a2e]">
+                      + {t.scan.needMore}: {dishMissing(d).join(", ")}
+                    </p>
+                  )}
                 </div>
               </button>
             ))}
