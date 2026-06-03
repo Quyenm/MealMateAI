@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Apple,
   ShoppingCart,
+  Users,
   CreditCard,
   Settings,
   ShieldCheck,
@@ -29,6 +30,7 @@ type NavKey =
   | "mealplan"
   | "nutrition"
   | "shopping"
+  | "family"
   | "plans"
   | "settings"
   | "admin";
@@ -41,6 +43,7 @@ const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
   { href: "/nutrition", key: "nutrition", Icon: Apple },
   { href: "/history", key: "history", Icon: Clock },
   { href: "/shopping", key: "shopping", Icon: ShoppingCart },
+  { href: "/family", key: "family", Icon: Users },
   { href: "/upgrade", key: "plans", Icon: CreditCard },
   { href: "/settings", key: "settings", Icon: Settings },
 ];

@@ -35,9 +35,20 @@ export async function POST(req: Request) {
   const { action, items, id, expiry_date, names } = parsed.data;
   const admin = createAdminClient();
 
+  // The caller's household (shared fridge) if any.
+  const { data: hm } = await admin
+    .from("household_members")
+    .select("household_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  const hid = hm?.household_id ?? null;
+  // Filter that scopes a query to the user's own rows OR their household's.
+  const scope = hid ? `user_id.eq.${user.id},household_id.eq.${hid}` : null;
+
   if (action === "add") {
     const rows = (items ?? []).map((it) => ({
       user_id: user.id,
+      household_id: hid,
       name: it.name,
       name_en: it.name_en ?? null,
       amount: it.amount ?? null,
@@ -56,25 +67,23 @@ export async function POST(req: Request) {
   }
 
   if (action === "update" && id) {
-    await admin
-      .from("inventory_items")
-      .update({ expiry_date: expiry_date || null })
-      .eq("user_id", user.id)
-      .eq("id", id);
+    let q = admin.from("inventory_items").update({ expiry_date: expiry_date || null }).eq("id", id);
+    q = scope ? q.or(scope) : q.eq("user_id", user.id);
+    await q;
     return NextResponse.json({ ok: true });
   }
 
   if (action === "remove" && id) {
-    await admin.from("inventory_items").delete().eq("user_id", user.id).eq("id", id);
+    let q = admin.from("inventory_items").delete().eq("id", id);
+    q = scope ? q.or(scope) : q.eq("user_id", user.id);
+    await q;
     return NextResponse.json({ ok: true });
   }
 
   if (action === "deduct" && names?.length) {
-    // Remove inventory items whose name fuzzily matches a used ingredient.
-    const { data: inv } = await admin
-      .from("inventory_items")
-      .select("id, name, name_en")
-      .eq("user_id", user.id);
+    let sel = admin.from("inventory_items").select("id, name, name_en");
+    sel = scope ? sel.or(scope) : sel.eq("user_id", user.id);
+    const { data: inv } = await sel;
     const used = names.map(norm).filter((s) => s.length > 1);
     const toRemove = (inv ?? [])
       .filter((row) => {
@@ -84,7 +93,7 @@ export async function POST(req: Request) {
       })
       .map((row) => row.id);
     if (toRemove.length) {
-      await admin.from("inventory_items").delete().eq("user_id", user.id).in("id", toRemove);
+      await admin.from("inventory_items").delete().in("id", toRemove);
     }
     return NextResponse.json({ ok: true, removed: toRemove.length });
   }

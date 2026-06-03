@@ -23,10 +23,11 @@ export default async function FridgePage() {
   const t = STR[locale].fridge;
 
   const supabase = await createClient();
+  // No user_id filter: RLS returns the user's own items + their household's
+  // shared items (see migration 0012).
   const { data } = await supabase
     .from("inventory_items")
     .select("id, name, name_en, amount, expiry_date")
-    .eq("user_id", user.id)
     .order("expiry_date", { ascending: true });
 
   return (
