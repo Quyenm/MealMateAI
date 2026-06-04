@@ -34,23 +34,43 @@ async function pexels(query: string): Promise<DishImage | "quota" | null> {
   }
 }
 
-// YouTube cooking-video thumbnail (stable Google CDN URL).
-async function youtubeThumb(query: string): Promise<DishImage | "quota" | null> {
+// YouTube cooking-video thumbnail (stable Google CDN URL). The API's top result
+// is noisy (music/news/Shorts leak in), so we fetch a page and pick the first
+// video whose TITLE actually names the dish — the real cooking video is usually
+// a few rows down, not at the top.
+type YtItem = {
+  id?: { videoId?: string };
+  snippet?: { title?: string; thumbnails?: Record<string, { url?: string } | undefined> };
+};
+async function youtubeThumb(dish: string): Promise<DishImage | "quota" | null> {
   if (!YT_KEY) return null;
   try {
     const url =
-      `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1` +
-      `&q=${encodeURIComponent("cách làm " + query)}&key=${YT_KEY}`;
+      `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=10` +
+      `&q=${encodeURIComponent("cách làm " + dish)}&key=${YT_KEY}`;
     const res = await fetch(url, { signal: AbortSignal.timeout(4500) });
     if (res.status === 403 || res.status === 429) return "quota";
     if (!res.ok) return null;
     const data = await res.json();
-    const item = data?.items?.[0];
-    const th = item?.snippet?.thumbnails;
-    const thumb: string | undefined = th?.high?.url || th?.medium?.url || th?.default?.url;
-    const vid: string | undefined = item?.id?.videoId;
-    if (!thumb) return null;
-    return { url: thumb, credit_url: vid ? `https://www.youtube.com/watch?v=${vid}` : undefined };
+    const items: YtItem[] = data?.items ?? [];
+
+    // Require the result title to contain enough of the dish's own words.
+    const tokens = normKey(dish)
+      .split(" ")
+      .filter((t) => t.length >= 3);
+    const need = Math.max(1, Math.min(tokens.length, Math.ceil(tokens.length * 0.6)));
+    for (const it of items) {
+      const title = it.snippet?.title;
+      if (!title) continue;
+      const nt = normKey(title);
+      if (tokens.filter((t) => nt.includes(t)).length < need) continue;
+      const th = it.snippet?.thumbnails;
+      const thumb = th?.high?.url || th?.medium?.url || th?.default?.url;
+      if (!thumb) continue;
+      const vid = it.id?.videoId;
+      return { url: thumb, credit_url: vid ? `https://www.youtube.com/watch?v=${vid}` : undefined };
+    }
+    return null;
   } catch {
     return null;
   }
