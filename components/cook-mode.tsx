@@ -212,8 +212,26 @@ export function CookMode({
               <RotateCcw className="size-4" /> {t.cook.reset}
             </Button>
           </div>
+          {/* Live fine-tune — works even while the timer runs, for dishes that
+              take longer than expected. */}
+          <div className="flex items-center gap-1.5">
+            {[
+              { label: "−1′", d: -60 },
+              { label: "+1′", d: 60 },
+              { label: "+5′", d: 300 },
+            ].map(({ label, d }) => (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setSecs((s) => Math.max(0, s + d))}
+                className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
           <div className="flex flex-wrap justify-center gap-1.5">
-            {[1, 3, 5, 10, 15, 20].map((m) => (
+            {[3, 5, 10, 15, 20, 30, 45].map((m) => (
               <button
                 key={m}
                 type="button"

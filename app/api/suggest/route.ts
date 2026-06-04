@@ -156,6 +156,15 @@ export async function POST(req: Request) {
         image: (await fetchDishImage(d.title_vi, d.title_en, admin)) ?? undefined,
       })),
   );
+  // Stock search often returns the SAME photo for similar dishes (e.g. several
+  // "thịt băm…" dishes). Keep each photo on the first dish only; later repeats
+  // fall back to the placeholder so the list doesn't show the same image twice.
+  const seenImage = new Set<string>();
+  for (const d of dishes) {
+    if (!d.image?.url) continue;
+    if (seenImage.has(d.image.url)) d.image = undefined;
+    else seenImage.add(d.image.url);
+  }
 
   // Persist (text only — never the photo).
   const { data: scan } = await admin
