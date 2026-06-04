@@ -28,6 +28,7 @@ export default async function CommunityPage() {
   const { data } = await admin
     .from("community_posts")
     .select("id, user_id, dish_title, note, image_url, created_at, profiles(email, display_name)")
+    .eq("hidden", false)
     .order("created_at", { ascending: false })
     .limit(60);
 

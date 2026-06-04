@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, UtensilsCrossed } from "lucide-react";
+import { Trash2, UtensilsCrossed, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useLang } from "@/components/landing/i18n";
 
@@ -33,6 +33,22 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
   const en = lang === "en";
   const router = useRouter();
   const [busy, setBusy] = useState<string | null>(null);
+  const [reported, setReported] = useState<Set<string>>(new Set());
+
+  async function report(id: string) {
+    setReported((s) => new Set(s).add(id));
+    try {
+      const res = await fetch("/api/community/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postId: id }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success(t.community.reported);
+    } catch {
+      toast.error(t.scan.toast.netErr);
+    }
+  }
 
   async function remove(id: string) {
     setBusy(id);
@@ -68,7 +84,7 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
           <div className="flex flex-col gap-1.5 p-4">
             <div className="flex items-start justify-between gap-2">
               <span className="font-bold tracking-tight">{p.dish_title}</span>
-              {p.mine && (
+              {p.mine ? (
                 <button
                   type="button"
                   disabled={busy === p.id}
@@ -77,6 +93,17 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
                   className="text-muted-foreground/50 transition hover:text-[#c8102e] disabled:opacity-40"
                 >
                   <Trash2 className="size-4" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={reported.has(p.id)}
+                  onClick={() => report(p.id)}
+                  aria-label={t.community.report}
+                  title={t.community.report}
+                  className="text-muted-foreground/40 transition hover:text-[#c8102e] disabled:opacity-40"
+                >
+                  <Flag className="size-4" />
                 </button>
               )}
             </div>

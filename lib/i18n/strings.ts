@@ -194,6 +194,8 @@ export const STR = {
       anon: "Ẩn danh",
       delete: "Xoá",
       deleted: "Đã xoá bài",
+      report: "Báo cáo",
+      reported: "Đã báo cáo, cảm ơn bạn",
     },
     profile: {
       title: "Hồ sơ",
@@ -763,6 +765,8 @@ export const STR = {
       anon: "Anonymous",
       delete: "Delete",
       deleted: "Post deleted",
+      report: "Report",
+      reported: "Reported, thank you",
     },
     profile: {
       title: "Profile",
