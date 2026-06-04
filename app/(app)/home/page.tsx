@@ -5,6 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
 import { STR } from "@/lib/i18n/strings";
+import { NameNudge } from "@/components/name-nudge";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +58,8 @@ export default async function HomePage() {
           <p className="text-sm text-muted-foreground">{t.greeting}</p>
           <p className="truncate text-lg font-bold tracking-tight lg:text-xl">{displayName}</p>
         </div>
+
+        {!pData?.display_name && <NameNudge />}
 
         {/* hero row */}
         <div className="grid gap-4 lg:grid-cols-3">
