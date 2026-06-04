@@ -209,6 +209,12 @@ export const STR = {
       statSaved: "Đã lưu",
       statPosts: "Bài đăng",
     },
+    onboarding: {
+      title: "Chào mừng tới MealMate!",
+      sub: "Cho bọn mình biết vài thứ để gợi ý món hợp bạn hơn.",
+      cta: "Bắt đầu nấu",
+      skip: "Để sau",
+    },
     account: {
       tabProfile: "Hồ sơ",
       tabTaste: "Khẩu vị",
@@ -771,6 +777,12 @@ export const STR = {
       statScans: "Scans",
       statSaved: "Saved",
       statPosts: "Posts",
+    },
+    onboarding: {
+      title: "Welcome to MealMate!",
+      sub: "Tell us a bit so we can suggest dishes that fit you.",
+      cta: "Start cooking",
+      skip: "Skip for now",
     },
     account: {
       tabProfile: "Profile",

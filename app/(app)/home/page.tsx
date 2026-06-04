@@ -36,8 +36,9 @@ export default async function HomePage() {
       .eq("status", "suggested")
       .order("created_at", { ascending: false })
       .limit(4),
-    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name, onboarding_completed").eq("id", user.id).maybeSingle(),
   ]);
+  if (pData && !pData.onboarding_completed) redirect("/onboarding");
   const displayName = pData?.display_name || user.email?.split("@")[0] || user.email;
 
   const q = (Array.isArray(qData) ? qData[0] : qData) as Quota | null;

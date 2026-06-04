@@ -15,6 +15,7 @@ const Body = z.object({
   spice_pref: z.enum(["mild", "medium", "hot"]).optional(),
   allergies: z.array(z.string().trim().min(1).max(40)).max(30).optional(),
   never_suggest: z.array(z.string().trim().min(1).max(40)).max(30).optional(),
+  onboarding_completed: z.boolean().optional(),
 });
 
 /** Save the signed-in user's profile / taste prefs (own row). */
