@@ -56,23 +56,21 @@ async function youtubeThumb(query: string): Promise<DishImage | "quota" | null> 
   }
 }
 
-async function resolve(titleVi: string, titleEn?: string): Promise<DishImage | "quota" | null> {
+type Source = "youtube" | "pexels";
+type Resolved = { image: DishImage | null; source: Source | null; quota: boolean };
+
+async function resolve(titleVi: string, titleEn?: string): Promise<Resolved> {
   const y = await youtubeThumb(titleVi || titleEn || ""); // Vietnamese title searches best
-  if (y && y !== "quota") return y;
+  if (y && y !== "quota") return { image: y, source: "youtube", quota: false };
   const p = await pexels(`${titleEn || titleVi} food`); // Pexels is English-indexed
-  if (p && p !== "quota") return p;
-  if (y === "quota" || p === "quota") return "quota"; // transient — don't cache a miss
-  return null;
+  if (p && p !== "quota") return { image: p, source: "pexels", quota: false };
+  return { image: null, source: null, quota: y === "quota" || p === "quota" };
 }
 
 // Collapse concurrent resolves of the same dish (one /api/suggest fans out ~10
 // in parallel) so an identical title is searched once, not once per caller.
-const inFlight = new Map<string, Promise<DishImage | "quota" | null>>();
-function resolveOnce(
-  titleVi: string,
-  titleEn: string | undefined,
-  key: string,
-): Promise<DishImage | "quota" | null> {
+const inFlight = new Map<string, Promise<Resolved>>();
+function resolveOnce(titleVi: string, titleEn: string | undefined, key: string): Promise<Resolved> {
   const existing = inFlight.get(key);
   if (existing) return existing;
   const p = resolve(titleVi, titleEn).finally(() => inFlight.delete(key));
@@ -80,12 +78,15 @@ function resolveOnce(
   return p;
 }
 
+const UPGRADE_AFTER_MS = 24 * 60 * 60 * 1000; // re-try a non-YouTube cache entry once a day
+
 /**
  * Resolve a dish photo, cached in dish_images so each distinct dish costs at
- * most one search ever (the free quotas are ~100 searches/day). Returns null
- * (→ branded placeholder) when no source is configured or nothing matches.
- * Never throws — the cache is best-effort, so a missing dish_images table (e.g.
- * migration 0014 not run yet) still serves live images, just without caching.
+ * most one search per day (the free quotas are ~100 searches/day). A YouTube
+ * hit is kept permanently; a Pexels fallback or a miss is kept for a day then
+ * re-tried, so it auto-upgrades to a real YouTube photo once quota frees up.
+ * Never throws — the cache is best-effort, so a missing table (migration 0014
+ * not run) still serves live images, just without caching.
  */
 export async function fetchDishImage(
   titleVi: string,
@@ -98,36 +99,50 @@ export async function fetchDishImage(
   if (!key) return null;
   const db = admin ?? createAdminClient();
 
+  const toImg = (c: { image_url: string | null; credit_url: string | null }): DishImage | null =>
+    c.image_url ? { url: c.image_url, credit_url: c.credit_url ?? undefined } : null;
+
   // 1) cache read (best-effort)
+  let cached: { image_url: string | null; credit_url: string | null; source: string | null; created_at: string } | null =
+    null;
   try {
-    const { data: cached, error } = await db
+    const { data, error } = await db
       .from("dish_images")
-      .select("image_url, credit_url")
+      .select("image_url, credit_url, source, created_at")
       .eq("title_key", key)
       .maybeSingle();
     if (error) throw error;
-    if (cached) {
-      return cached.image_url ? { url: cached.image_url, credit_url: cached.credit_url ?? undefined } : null;
-    }
+    cached = data;
   } catch (e) {
-    console.warn("[images] cache read skipped (run migration 0014?):", (e as Error).message);
+    console.warn("[images] cache read skipped (run migration 0014/0015?):", (e as Error).message);
+  }
+
+  if (cached) {
+    const fresh = Date.now() - new Date(cached.created_at).getTime() < UPGRADE_AFTER_MS;
+    // A good YouTube photo is final; anything else is served but re-tried daily.
+    if (cached.source === "youtube" || fresh) return toImg(cached);
   }
 
   // 2) live resolve (deduped across concurrent identical titles)
   const r = await resolveOnce(titleVi, titleEn, key);
-  if (r === "quota") return null;
+  // Over quota right now → keep serving whatever we already had, don't downgrade.
+  if (r.quota) return cached ? toImg(cached) : null;
 
   // 3) cache write (best-effort — never block the image on a cache failure)
   try {
-    const { error } = await db
-      .from("dish_images")
-      .upsert(
-        { title_key: key, image_url: r?.url ?? null, credit_url: r?.credit_url ?? null },
-        { onConflict: "title_key" },
-      );
+    const { error } = await db.from("dish_images").upsert(
+      {
+        title_key: key,
+        image_url: r.image?.url ?? null,
+        credit_url: r.image?.credit_url ?? null,
+        source: r.source,
+        created_at: new Date().toISOString(),
+      },
+      { onConflict: "title_key" },
+    );
     if (error) throw error;
   } catch (e) {
-    console.warn("[images] cache write skipped (run migration 0014?):", (e as Error).message);
+    console.warn("[images] cache write skipped (run migration 0014/0015?):", (e as Error).message);
   }
-  return r;
+  return r.image;
 }

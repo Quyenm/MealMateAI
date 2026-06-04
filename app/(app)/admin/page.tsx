@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getAdminUser } from "@/lib/admin";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
@@ -34,9 +35,17 @@ export default async function AdminPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-3xl flex-1 flex-col gap-4 p-4 lg:p-8">
-      <div>
-        <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
+        </div>
+        <Link
+          href="/admin/images"
+          className="shrink-0 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-primary/10 hover:text-primary"
+        >
+          {t.imgTitle}
+        </Link>
       </div>
 
       {rows.length === 0 && (

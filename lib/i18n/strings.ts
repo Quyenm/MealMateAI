@@ -295,6 +295,11 @@ export const STR = {
       approved: "Đã duyệt + nâng gói",
       rejected: "Đã từ chối",
       error: "Lỗi, thử lại",
+      imgTitle: "Duyệt ảnh món",
+      imgSub: "Ảnh đã cache cho từng món. Thấy ảnh nào sai thì bấm xoá — lần scan sau sẽ tự tìm lại.",
+      imgEmpty: "Chưa có ảnh nào được cache.",
+      imgClear: "Xoá ảnh này",
+      imgCleared: "Đã xoá, sẽ tìm lại ảnh mới",
     },
     hero: {
       eyebrow: "Trợ lý nấu ăn AI cho người Việt",
@@ -764,6 +769,11 @@ export const STR = {
       approved: "Approved + upgraded",
       rejected: "Rejected",
       error: "Error, try again",
+      imgTitle: "Review dish photos",
+      imgSub: "Cached photo per dish. Spot a wrong one? Clear it — the next scan re-fetches.",
+      imgEmpty: "No photos cached yet.",
+      imgClear: "Clear this photo",
+      imgCleared: "Cleared — a new photo will be fetched",
     },
     hero: {
       eyebrow: "AI cooking assistant for Vietnamese kitchens",
