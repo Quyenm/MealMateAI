@@ -330,6 +330,10 @@ export const STR = {
       stCanceled: "Đã huỷ",
       stRefunded: "Hoàn tiền",
       stExpired: "Hết hạn",
+      chartsTitle: "Biểu đồ",
+      chartsSub: "Doanh thu và người dùng mới 30 ngày gần nhất.",
+      chartRevenue: "Doanh thu / ngày",
+      chartSignups: "User mới / ngày",
     },
     hero: {
       eyebrow: "Trợ lý nấu ăn AI cho người Việt",
@@ -834,6 +838,10 @@ export const STR = {
       stCanceled: "Canceled",
       stRefunded: "Refunded",
       stExpired: "Expired",
+      chartsTitle: "Charts",
+      chartsSub: "Revenue and new users over the last 30 days.",
+      chartRevenue: "Revenue / day",
+      chartSignups: "New users / day",
     },
     hero: {
       eyebrow: "AI cooking assistant for Vietnamese kitchens",
