@@ -105,14 +105,25 @@ export default async function AdminPage() {
   return (
     <main className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-6 p-4 lg:p-8">
       {/* ── Dashboard ── */}
-      <div className="flex items-start justify-between gap-3">
+      <div className="flex flex-col gap-3">
         <h1 className="text-xl font-bold tracking-tight">{t.overview}</h1>
-        <Link
-          href="/admin/images"
-          className="shrink-0 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-primary/10 hover:text-primary"
-        >
-          {t.imgTitle}
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { href: "/admin/users", label: t.navUsers },
+            { href: "/admin/payments", label: t.navPayments },
+            { href: "/admin/charts", label: t.navCharts },
+            { href: "/admin/config", label: t.navConfig },
+            { href: "/admin/images", label: t.imgTitle },
+          ].map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className="rounded-full bg-muted px-3 py-1.5 text-xs font-semibold text-foreground transition hover:bg-primary/10 hover:text-primary"
+            >
+              {l.label}
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
