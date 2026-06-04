@@ -48,6 +48,10 @@ export const STR = {
       resetDone: "Đã đổi mật khẩu, đăng nhập lại nhé!",
       resetInvalid: "Link không hợp lệ hoặc đã hết hạn.",
       backToLogin: "Về đăng nhập",
+      agreePre: "Bằng việc tạo tài khoản, bạn đồng ý với",
+      agreeAnd: "và",
+      termsLink: "Điều khoản",
+      privacyLink: "Chính sách bảo mật",
     },
     shell: {
       home: "Trang chủ",
@@ -607,6 +611,10 @@ export const STR = {
       resetDone: "Password changed — please log in again!",
       resetInvalid: "This link is invalid or has expired.",
       backToLogin: "Back to login",
+      agreePre: "By creating an account, you agree to our",
+      agreeAnd: "and",
+      termsLink: "Terms",
+      privacyLink: "Privacy Policy",
     },
     shell: {
       home: "Home",

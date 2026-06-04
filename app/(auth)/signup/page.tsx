@@ -99,6 +99,17 @@ export default function SignupPage() {
         >
           {loading ? t.auth.signupLoading : t.auth.signupCta}
         </Button>
+        <p className="text-center text-xs leading-relaxed text-muted-foreground">
+          {t.auth.agreePre}{" "}
+          <Link href="/terms" className="font-medium text-primary hover:underline">
+            {t.auth.termsLink}
+          </Link>{" "}
+          {t.auth.agreeAnd}{" "}
+          <Link href="/privacy" className="font-medium text-primary hover:underline">
+            {t.auth.privacyLink}
+          </Link>
+          .
+        </p>
       </form>
 
       <div className="my-5 flex items-center gap-3 text-xs text-muted-foreground">

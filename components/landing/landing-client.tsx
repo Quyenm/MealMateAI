@@ -90,7 +90,7 @@ const DEMO_META = [
 ];
 const FOOTER_HREFS: string[][] = [
   ["#features", "#how", "#pricing", "#faq"],
-  ["#", "#", "#", "#"],
+  ["#", "/privacy", "/terms", "/privacy"],
   ["#", "#", "#", "#"],
 ];
 
