@@ -26,7 +26,7 @@ export default async function HomePage() {
 
   const supabase = await createClient();
   // The two reads are independent — run them in parallel instead of serially.
-  const [{ data: qData }, { data: rData }] = await Promise.all([
+  const [{ data: qData }, { data: rData }, { data: pData }] = await Promise.all([
     supabase.rpc("get_quota_status", { p_user: user.id }),
     supabase
       .from("scans")
@@ -35,7 +35,9 @@ export default async function HomePage() {
       .eq("status", "suggested")
       .order("created_at", { ascending: false })
       .limit(4),
+    supabase.from("profiles").select("display_name").eq("id", user.id).maybeSingle(),
   ]);
+  const displayName = pData?.display_name || user.email?.split("@")[0] || user.email;
 
   const q = (Array.isArray(qData) ? qData[0] : qData) as Quota | null;
   const used = q?.used ?? 0;
@@ -53,7 +55,7 @@ export default async function HomePage() {
         {/* greeting */}
         <div className="pt-1">
           <p className="text-sm text-muted-foreground">{t.greeting}</p>
-          <p className="truncate text-lg font-bold tracking-tight lg:text-xl">{user.email}</p>
+          <p className="truncate text-lg font-bold tracking-tight lg:text-xl">{displayName}</p>
         </div>
 
         {/* hero row */}

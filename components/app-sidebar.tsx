@@ -13,6 +13,7 @@ import {
   ShoppingCart,
   Users,
   Sparkles,
+  UserRound,
   CreditCard,
   Settings,
   ShieldCheck,
@@ -34,6 +35,7 @@ type NavKey =
   | "family"
   | "community"
   | "plans"
+  | "profile"
   | "settings"
   | "admin";
 const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
@@ -48,6 +50,7 @@ const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
   { href: "/family", key: "family", Icon: Users },
   { href: "/community", key: "community", Icon: Sparkles },
   { href: "/upgrade", key: "plans", Icon: CreditCard },
+  { href: "/profile", key: "profile", Icon: UserRound },
   { href: "/settings", key: "settings", Icon: Settings },
 ];
 
