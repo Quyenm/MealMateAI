@@ -18,7 +18,7 @@ export default async function ProfilePage() {
   const supabase = await createClient();
   const admin = createAdminClient();
   const [{ data: profile }, scansC, savedC, postsC] = await Promise.all([
-    supabase.from("profiles").select("display_name, email, tier, created_at").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("display_name, email, avatar_url, tier, created_at").eq("id", user.id).maybeSingle(),
     admin.from("scans").select("id", { count: "exact", head: true }).eq("user_id", user.id).is("deleted_at", null),
     admin.from("saved_dishes").select("id", { count: "exact", head: true }).eq("user_id", user.id),
     admin.from("community_posts").select("id", { count: "exact", head: true }).eq("user_id", user.id),
@@ -38,6 +38,7 @@ export default async function ProfilePage() {
       <ProfileView
         email={email}
         displayName={profile?.display_name ?? ""}
+        avatarUrl={profile?.avatar_url ?? null}
         tier={profile?.tier ?? "free"}
         memberSince={memberSince}
         stats={{ scans: scansC.count ?? 0, saved: savedC.count ?? 0, posts: postsC.count ?? 0 }}
