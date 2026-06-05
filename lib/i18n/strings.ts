@@ -68,6 +68,7 @@ export const STR = {
       family: "Gia đình",
       community: "Cộng đồng",
       profile: "Hồ sơ",
+      menu: "Thêm",
       signOut: "Đăng xuất",
     },
     settings: {
@@ -639,6 +640,7 @@ export const STR = {
       family: "Family",
       community: "Community",
       profile: "Profile",
+      menu: "More",
       signOut: "Sign out",
     },
     settings: {

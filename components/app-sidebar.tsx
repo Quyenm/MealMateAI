@@ -2,54 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Home,
-  Camera,
-  Refrigerator,
-  Clock,
-  Heart,
-  CalendarDays,
-  Apple,
-  ShoppingCart,
-  Users,
-  Sparkles,
-  CreditCard,
-  Settings,
-  ShieldCheck,
-  type LucideIcon,
-} from "lucide-react";
+import { ShieldCheck } from "lucide-react";
 import { useT } from "@/components/landing/i18n";
 import { LangSwitcher } from "@/components/lang-switcher";
 import { SignOutButton } from "@/components/sign-out-button";
+import { NAV_ITEMS } from "@/components/nav-items";
 
-type NavKey =
-  | "home"
-  | "scan"
-  | "fridge"
-  | "history"
-  | "favorites"
-  | "mealplan"
-  | "nutrition"
-  | "shopping"
-  | "family"
-  | "community"
-  | "plans"
-  | "settings"
-  | "admin";
-const ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
-  { href: "/home", key: "home", Icon: Home },
-  { href: "/scan", key: "scan", Icon: Camera },
-  { href: "/fridge", key: "fridge", Icon: Refrigerator },
-  { href: "/favorites", key: "favorites", Icon: Heart },
-  { href: "/plan", key: "mealplan", Icon: CalendarDays },
-  { href: "/nutrition", key: "nutrition", Icon: Apple },
-  { href: "/history", key: "history", Icon: Clock },
-  { href: "/shopping", key: "shopping", Icon: ShoppingCart },
-  { href: "/family", key: "family", Icon: Users },
-  { href: "/community", key: "community", Icon: Sparkles },
-  { href: "/upgrade", key: "plans", Icon: CreditCard },
-  { href: "/settings", key: "settings", Icon: Settings },
-];
+const ITEMS = NAV_ITEMS;
 
 /** Desktop-only left navigation rail (lg+). Mobile uses AppHeader + BottomNav. */
 export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
