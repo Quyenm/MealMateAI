@@ -34,8 +34,19 @@ export function ShoppingList({ initial }: { initial: Item[] }) {
     }
   }
   async function toggle(it: Item) {
-    setItems((xs) => xs.map((x) => (x.id === it.id ? { ...x, checked: !x.checked } : x)));
-    await post({ action: "toggle", id: it.id, checked: !it.checked });
+    const nowChecked = !it.checked;
+    setItems((xs) => xs.map((x) => (x.id === it.id ? { ...x, checked: nowChecked } : x)));
+    await post({ action: "toggle", id: it.id, checked: nowChecked });
+    // Bought it → it's now in the fridge (dedup handled server-side).
+    if (nowChecked) {
+      fetch("/api/inventory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "stock", items: [{ name: it.name }] }),
+      })
+        .then((r) => r.ok && toast.success(t.shopping.bought))
+        .catch(() => {});
+    }
   }
   async function remove(it: Item) {
     setItems((xs) => xs.filter((x) => x.id !== it.id));

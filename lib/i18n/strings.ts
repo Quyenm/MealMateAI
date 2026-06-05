@@ -130,6 +130,7 @@ export const STR = {
       placeholder: "Thêm món cần mua…",
       clearChecked: "Xoá món đã mua",
       added: "Đã thêm vào đi chợ",
+      bought: "Đã mua → vào tủ lạnh",
       addMissing: "Thêm vào đi chợ",
     },
     fridge: {
@@ -702,6 +703,7 @@ export const STR = {
       placeholder: "Add an item to buy…",
       clearChecked: "Clear bought",
       added: "Added to shopping list",
+      bought: "Bought → added to fridge",
       addMissing: "Add to shopping list",
     },
     fridge: {
