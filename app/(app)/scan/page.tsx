@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import {
   Camera,
   Flame,
+  Check,
   X,
   Plus,
   Clock,
@@ -89,11 +90,10 @@ export default function ScanPage() {
   const dishMissing = (d: Dish) =>
     (en ? d.missing_ingredients_en || d.missing_ingredients : d.missing_ingredients) || [];
   const selected = selectedDish !== null ? dishes[selectedDish] : undefined;
-  // Fridge items the user hasn't added to this scan yet — shown as a reminder.
-  const fridgeNotInList = (() => {
-    const have = new Set(ingredients.map((g) => norm(g.name_vi)));
-    return fridgeItems.filter((f) => !have.has(norm(f.name)));
-  })();
+  // Fridge contents surfaced on the confirm step. Items already in the list show
+  // as added (✓); the rest are tap-to-add.
+  const inListKeys = new Set(ingredients.map((g) => norm(g.name_vi)));
+  const fridgeNotInList = fridgeItems.filter((f) => !inListKeys.has(norm(f.name)));
 
   // Open a dish detail and push a history entry, so the browser/phone Back
   // button returns to the suggestion list (not all the way back to the scan).
@@ -454,30 +454,42 @@ export default function ScanPage() {
             )}
           </div>
 
-          {fridgeNotInList.length > 0 && (
+          {fridgeItems.length > 0 && (
             <div className="flex flex-col gap-2 rounded-2xl bg-warm-50 p-3 ring-1 ring-warm-400/40">
               <div className="flex items-center gap-1.5 text-xs font-semibold text-[#8a4b25]">
-                <Refrigerator className="size-4" /> {t.scan.fridgeReminder}
+                <Refrigerator className="size-4" /> {t.scan.fridgeReminder} ({fridgeItems.length})
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {fridgeNotInList.map((f, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => addFromFridge(f)}
-                    className="rounded-full border border-warm-400/50 bg-background px-2.5 py-1 text-xs font-medium transition hover:bg-warm-50"
-                  >
-                    + {en && f.name_en ? f.name_en : f.name}
-                  </button>
-                ))}
+                {fridgeItems.map((f, i) => {
+                  const label = en && f.name_en ? f.name_en : f.name;
+                  return inListKeys.has(norm(f.name)) ? (
+                    <span
+                      key={i}
+                      className="inline-flex items-center gap-1 rounded-full border border-warm-400/30 bg-warm-100/60 px-2.5 py-1 text-xs font-medium text-muted-foreground"
+                    >
+                      <Check className="size-3" /> {label}
+                    </span>
+                  ) : (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => addFromFridge(f)}
+                      className="rounded-full border border-warm-400/50 bg-background px-2.5 py-1 text-xs font-medium transition hover:bg-warm-50"
+                    >
+                      + {label}
+                    </button>
+                  );
+                })}
               </div>
-              <button
-                type="button"
-                onClick={addAllFromFridge}
-                className="self-start text-xs font-semibold text-primary hover:underline"
-              >
-                {t.scan.fridgeAddAll}
-              </button>
+              {fridgeNotInList.length > 0 && (
+                <button
+                  type="button"
+                  onClick={addAllFromFridge}
+                  className="self-start text-xs font-semibold text-primary hover:underline"
+                >
+                  {t.scan.fridgeAddAll}
+                </button>
+              )}
             </div>
           )}
 
