@@ -72,26 +72,23 @@ export function ShoppingList({ initial }: { initial: Item[] }) {
               key={it.id}
               className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-border/60"
             >
-              <button
-                type="button"
-                onClick={() => toggle(it)}
-                aria-label={it.name}
-                className={`flex size-5 shrink-0 items-center justify-center rounded-md border transition ${
-                  it.checked
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border"
-                }`}
-              >
-                {it.checked && <Check className="size-3.5" />}
+              <button type="button" onClick={() => toggle(it)} aria-label={it.name} className="-m-2 shrink-0 p-2">
+                <span
+                  className={`flex size-5 items-center justify-center rounded-md border transition ${
+                    it.checked ? "border-primary bg-primary text-primary-foreground" : "border-border"
+                  }`}
+                >
+                  {it.checked && <Check className="size-3.5" />}
+                </span>
               </button>
-              <span className={`flex-1 text-sm ${it.checked ? "text-muted-foreground line-through" : ""}`}>
+              <span className={`min-w-0 flex-1 text-sm ${it.checked ? "text-muted-foreground line-through" : ""}`}>
                 {it.name}
               </span>
               <button
                 type="button"
                 onClick={() => remove(it)}
                 aria-label="remove"
-                className="text-muted-foreground/60 transition hover:text-foreground"
+                className="-m-2 shrink-0 rounded-md p-2 text-muted-foreground/60 transition hover:text-foreground"
               >
                 <X className="size-4" />
               </button>

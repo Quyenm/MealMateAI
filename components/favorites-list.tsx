@@ -122,7 +122,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
                   type="button"
                   onClick={() => remove(s)}
                   aria-label={t.favorites.saved}
-                  className="shrink-0 text-[#c8102e] transition hover:opacity-70"
+                  className="-m-2 shrink-0 rounded-md p-2 text-[#c8102e] transition hover:opacity-70"
                 >
                   <Heart className="size-5" fill="currentColor" />
                 </button>
@@ -135,7 +135,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
               <button
                 type="button"
                 onClick={() => setOpen(isOpen ? null : s.id)}
-                className="flex w-fit items-center gap-1 text-sm font-medium text-primary"
+                className="-ml-2 flex w-fit items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-primary transition hover:bg-primary/5"
               >
                 <ChevronDown className={`size-4 transition ${isOpen ? "rotate-180" : ""}`} /> {t.scan.stepsLabel}
               </button>

@@ -224,7 +224,7 @@ export function CookMode({
                 key={label}
                 type="button"
                 onClick={() => setSecs((s) => Math.max(0, s + d))}
-                className="rounded-full border border-border bg-background px-3 py-1 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
+                className="rounded-full border border-border bg-background px-3 py-2 text-xs font-semibold text-foreground transition hover:border-primary hover:text-primary"
               >
                 {label}
               </button>
@@ -236,7 +236,7 @@ export function CookMode({
                 key={m}
                 type="button"
                 onClick={() => setMinutes(m)}
-                className="rounded-full bg-muted px-2.5 py-1 text-xs font-medium text-muted-foreground transition hover:text-foreground"
+                className="rounded-full bg-muted px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition hover:text-foreground"
               >
                 {m} {t.cook.min}
               </button>

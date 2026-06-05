@@ -52,8 +52,8 @@ export default async function PayPage({
 
         <dl className="w-full divide-y divide-border/60 overflow-hidden rounded-2xl bg-background text-sm ring-1 ring-border/60">
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
-            <dt className="text-muted-foreground">{t.receiver}</dt>
-            <dd className="text-right font-medium">
+            <dt className="shrink-0 text-muted-foreground">{t.receiver}</dt>
+            <dd className="min-w-0 break-words text-right font-medium">
               {MOMO_NAME} · {MOMO_PHONE}
             </dd>
           </div>

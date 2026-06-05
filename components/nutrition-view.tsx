@@ -103,7 +103,7 @@ export function NutritionView({ items: initial, goal: initialGoal }: { items: Lo
                 type="button"
                 onClick={() => remove(it)}
                 aria-label="remove"
-                className="text-muted-foreground/60 transition hover:text-foreground"
+                className="-m-2 shrink-0 rounded-md p-2 text-muted-foreground/60 transition hover:text-foreground"
               >
                 <X className="size-4" />
               </button>

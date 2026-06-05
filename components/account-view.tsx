@@ -71,7 +71,7 @@ export function AccountView({ email }: { email: string }) {
       {/* password */}
       <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
         <span className="text-sm font-semibold">{t.account.pwLabel}</span>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="••••••" autoComplete="new-password" />
           <Button disabled={busy === "pw" || pw.length < 6} onClick={changePassword}>
             {t.account.pwSave}
@@ -83,7 +83,7 @@ export function AccountView({ email }: { email: string }) {
       <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
         <span className="text-sm font-semibold">{t.account.emailLabel}</span>
         <p className="text-xs text-muted-foreground">{email}</p>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new@email.com" />
           <Button
             variant="outline"

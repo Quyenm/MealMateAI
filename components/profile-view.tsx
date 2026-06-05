@@ -109,7 +109,7 @@ export function ProfileView({
       {/* name editor */}
       <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
         <span className="text-sm font-semibold">{t.profile.nameLabel}</span>
-        <div className="flex gap-2">
+        <div className="flex flex-col gap-2 sm:flex-row">
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.profile.namePlaceholder} maxLength={40} />
           <Button disabled={busy || !dirty} onClick={save}>
             {t.profile.save}

@@ -124,7 +124,7 @@ export function FamilyView({
             key={m.user_id}
             className="flex items-center gap-2 rounded-xl bg-card p-3 text-sm shadow-card ring-1 ring-border/60"
           >
-            <span className="flex-1">
+            <span className="min-w-0 flex-1 truncate">
               {m.email}
               {m.user_id === meId && <span className="ml-1 text-xs text-muted-foreground">({t.family.you})</span>}
             </span>

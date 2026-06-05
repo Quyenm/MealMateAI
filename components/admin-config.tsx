@@ -87,7 +87,7 @@ export function AdminConfig({ tiers }: { tiers: Tier[] }) {
             className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
           >
             <span className="font-bold uppercase tracking-tight">{x.tier}</span>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Field label={t.admin.cfgLabel} type="text" value={row.display_label} onChange={(v) => edit(x.tier, "display_label", v)} />
               <Field label={t.admin.cfgPrice} value={row.price_vnd} onChange={(v) => edit(x.tier, "price_vnd", v)} />
               <Field label={t.admin.cfgScans} value={row.daily_scan_limit} onChange={(v) => edit(x.tier, "daily_scan_limit", v)} />

@@ -28,7 +28,7 @@ export function AppHeader() {
           >
             <Settings className="size-[18px]" />
           </Link>
-          <LangSwitcher />
+          <LangSwitcher align="left" />
           <SignOutButton />
         </div>
       </div>

@@ -114,7 +114,7 @@ export function MealPlan({
                         type="button"
                         onClick={() => remove(it)}
                         aria-label="remove"
-                        className="text-muted-foreground/60 transition hover:text-foreground"
+                        className="-m-2 shrink-0 rounded-md p-2 text-muted-foreground/60 transition hover:text-foreground"
                       >
                         <X className="size-4" />
                       </button>
@@ -124,7 +124,7 @@ export function MealPlan({
                 <button
                   type="button"
                   onClick={() => setPickFor(date)}
-                  className="flex w-fit items-center gap-1 text-sm font-medium text-primary"
+                  className="-ml-2 flex w-fit items-center gap-1 rounded-lg px-2 py-1.5 text-sm font-medium text-primary transition hover:bg-primary/5"
                 >
                   <Plus className="size-4" /> {t.mealPlan.add}
                 </button>

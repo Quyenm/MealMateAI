@@ -40,7 +40,7 @@ export function SettingsTabs({ profile, prefs }: { profile: ProfileProps; prefs:
             key={x.key}
             type="button"
             onClick={() => setTab(x.key)}
-            className={`flex-1 rounded-full px-3 py-1.5 text-sm font-semibold transition ${
+            className={`flex-1 rounded-full px-2 py-1.5 text-xs font-semibold transition sm:px-3 sm:text-sm ${
               tab === x.key ? "bg-card text-foreground shadow-card" : "text-muted-foreground hover:text-foreground"
             }`}
           >
