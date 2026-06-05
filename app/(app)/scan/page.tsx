@@ -61,6 +61,17 @@ function youtubeSearch(query: string) {
 type FridgeItem = { name: string; name_en?: string | null; amount?: string | null };
 const norm = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{Diacritic}/gu, "").trim();
 
+// Common seasonings/staples we don't store in the fridge (note: "dau an" not bare
+// "dau", so "đậu" beans aren't mistaken for "dầu" oil).
+const STAPLES = [
+  "muoi", "duong", "nuoc mam", "nuoc tuong", "xi dau", "dau an", "tieu", "bot ngot",
+  "mi chinh", "hat nem", "nuoc loc", "nuoc soi", "dam", "giam",
+];
+const isStaple = (name: string) => {
+  const n = norm(name);
+  return STAPLES.some((s) => n.includes(s));
+};
+
 export default function ScanPage() {
   const router = useRouter();
   const t = useT();
@@ -192,6 +203,7 @@ export default function ScanPage() {
       setScanId(data.scanId ?? null);
       setSelectedDish(null);
       setStep("results");
+      stockToFridge(ingredients); // auto-remember scanned ingredients (skips staples)
       if (data.noMatch) {
         toast.message(t.scan.toast.noMatch, { description: t.scan.toast.noMatchDesc });
       }
@@ -231,22 +243,32 @@ export default function ScanPage() {
     });
   }
 
-  async function saveToFridge() {
-    if (!ingredients.length) return;
+  // Stock real (non-staple) ingredients into the fridge. Used both silently after
+  // a scan and by the explicit "Save to fridge" button.
+  async function stockToFridge(items: Ingredient[], notify = false) {
+    const real = items.filter((g) => !isStaple(g.name_vi));
+    if (!real.length) {
+      if (notify) toast.success(t.fridge.savedToast);
+      return;
+    }
     try {
       const res = await fetch("/api/inventory", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           action: "stock",
-          items: ingredients.map((g) => ({ name: g.name_vi, name_en: g.name_en, amount: g.amount })),
+          items: real.map((g) => ({ name: g.name_vi, name_en: g.name_en, amount: g.amount })),
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
-      toast.success(t.fridge.savedToast);
+      if (notify) toast.success(t.fridge.savedToast);
     } catch {
-      toast.error(t.scan.toast.netErr);
+      if (notify) toast.error(t.scan.toast.netErr);
     }
+  }
+  async function saveToFridge() {
+    if (!ingredients.length) return;
+    await stockToFridge(ingredients, true);
   }
 
   // After cooking: the scanned ingredients NOT used by the dish are leftovers —
