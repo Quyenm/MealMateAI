@@ -3,7 +3,9 @@ import { Be_Vietnam_Pro } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { LangProvider } from "@/components/landing/i18n";
+import { AnalyticsTracker } from "@/components/analytics-tracker";
 import { getLocale } from "@/lib/i18n/server";
+import { getCurrentUser } from "@/lib/auth";
 
 const beVietnam = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],
@@ -27,12 +29,14 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const lang = await getLocale();
+  const user = await getCurrentUser();
   return (
     <html lang={lang} className={`${beVietnam.variable} h-full antialiased`}>
       <body className="flex min-h-full flex-col font-sans">
         <LangProvider initialLang={lang}>
           {children}
           <Toaster richColors position="top-center" />
+          <AnalyticsTracker userId={user?.id ?? null} />
         </LangProvider>
       </body>
     </html>

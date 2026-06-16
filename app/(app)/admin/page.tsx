@@ -112,6 +112,7 @@ export default async function AdminPage() {
             { href: "/admin/users", label: t.navUsers },
             { href: "/admin/payments", label: t.navPayments },
             { href: "/admin/charts", label: t.navCharts },
+            { href: "/admin/analytics", label: t.navAnalytics },
             { href: "/admin/config", label: t.navConfig },
             { href: "/admin/images", label: t.imgTitle },
           ].map((l) => (

@@ -31,6 +31,8 @@ const LIMITERS = {
   suggest: make(15, "1 m"),
   claim: make(5, "10 m"),
   community: make(8, "10 m"),
+  // Analytics beacons (pageview/scroll/click batches) — generous, per IP.
+  analytics: make(100, "1 m"),
 } as const;
 
 export type RateKey = keyof typeof LIMITERS;

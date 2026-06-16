@@ -14,6 +14,11 @@ const PROTECTED_PREFIXES = ['/home', '/scan', '/recipe', '/fridge', '/history', 
 const AUTH_PAGES = ['/login', '/signup']
 
 export async function proxy(request: NextRequest) {
+  // Analytics beacons need no auth/redirect logic — skip the Supabase round-trip.
+  if (request.nextUrl.pathname.startsWith('/api/analytics')) {
+    return NextResponse.next({ request })
+  }
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(
