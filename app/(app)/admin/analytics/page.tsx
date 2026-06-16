@@ -16,6 +16,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
 import { STR } from "@/lib/i18n/strings";
 import { AdminBarChart } from "@/components/admin-bar-chart";
+import { AdminAutoRefresh } from "@/components/admin-auto-refresh";
 
 export const dynamic = "force-dynamic";
 
@@ -45,9 +46,17 @@ type Summary = {
   daily: { d: string; sessions: number }[];
 };
 
-export default async function AdminAnalyticsPage() {
+export default async function AdminAnalyticsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ clean?: string }>;
+}) {
   const adminUser = await getAdminUser();
   if (!adminUser) redirect("/home");
+
+  // Default: count ALL traffic so the dashboard isn't empty early on.
+  // ?clean=1 → exclude internal (admin) traffic for real-user-only metrics.
+  const includeInternal = (await searchParams)?.clean !== "1";
 
   const locale = await getLocale();
   const t = STR[locale].admin;
@@ -66,7 +75,10 @@ export default async function AdminAnalyticsPage() {
 
   const { days, sinceIso } = timeWindow();
   const admin = createAdminClient();
-  const { data, error } = await admin.rpc("admin_analytics_summary", { p_since: sinceIso });
+  const { data, error } = await admin.rpc("admin_analytics_summary", {
+    p_since: sinceIso,
+    p_include_internal: includeInternal,
+  });
   if (error) console.error("admin_analytics_summary failed", error);
   const s = (data ?? {}) as Partial<Summary>;
 
@@ -97,10 +109,24 @@ export default async function AdminAnalyticsPage() {
       >
         <ChevronLeft className="size-4" /> {t.overview}
       </Link>
-      <div>
-        <h1 className="text-xl font-bold tracking-tight">{t.anTitle}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.anSub}</p>
+      <div className="flex flex-wrap items-end justify-between gap-2">
+        <div>
+          <h1 className="text-xl font-bold tracking-tight">{t.anTitle}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t.anSub}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1 text-xs text-muted-foreground">
+            <span className="size-1.5 animate-pulse rounded-full bg-emerald-500" /> {t.anLive}
+          </span>
+          <Link
+            href={includeInternal ? "/admin/analytics?clean=1" : "/admin/analytics"}
+            className="rounded-full bg-muted px-3 py-1.5 text-xs font-semibold transition hover:bg-primary/10 hover:text-primary"
+          >
+            {includeInternal ? t.anRealUsersOnly : t.anIncludeInternal}
+          </Link>
+        </div>
       </div>
+      <AdminAutoRefresh seconds={20} />
 
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {cards.map((c) => {
@@ -147,7 +173,7 @@ export default async function AdminAnalyticsPage() {
         ))}
       </div>
 
-      <p className="text-xs text-muted-foreground">{t.anFootnote}</p>
+      <p className="text-xs text-muted-foreground">{includeInternal ? t.anFootnoteAll : t.anFootnote}</p>
     </main>
   );
 }
