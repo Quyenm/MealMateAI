@@ -8,6 +8,8 @@ import { STR } from "@/lib/i18n/strings";
 import { NameNudge } from "@/components/name-nudge";
 import { Reveal } from "@/components/reveal";
 import { FoodThumb } from "@/components/food-thumb";
+import { AnimatedNumber } from "@/components/animated-number";
+import { ProgressRing } from "@/components/progress-ring";
 import type { GlyphName } from "@/components/landing/food-glyphs";
 
 export const dynamic = "force-dynamic";
@@ -57,9 +59,6 @@ export default async function HomePage() {
   // Presentation-only helpers (no new data is fetched).
   const nav = STR[locale].shell;
   const initial = (displayName || "?").trim().charAt(0).toUpperCase();
-  const RING_R = 24;
-  const RING_C = 2 * Math.PI * RING_R;
-  const ringOffset = RING_C * (1 - remainingPct / 100);
   const tiles: { href: string; label: string; Icon: typeof Camera; warm?: boolean }[] = [
     { href: "/fridge", label: nav.fridge, Icon: Refrigerator, warm: true },
     { href: "/plan", label: nav.mealplan, Icon: CalendarDays },
@@ -99,8 +98,8 @@ export default async function HomePage() {
             <div className="relative flex items-start justify-between gap-4">
               <div>
                 <span className="text-sm text-white/85">{t.quotaToday}</span>
-                <p className="mt-2 text-5xl font-extrabold leading-none">
-                  {remaining}
+                <p className="mt-2 text-6xl font-extrabold leading-none tracking-tight">
+                  <AnimatedNumber value={remaining} />
                   <span className="text-xl font-medium text-white/70"> / {limit}</span>
                 </p>
                 <p className="mt-1.5 text-xs text-white/75">
@@ -111,24 +110,7 @@ export default async function HomePage() {
                 <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold uppercase tracking-wide">
                   {tier}
                 </span>
-                <svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
-                  <circle cx="30" cy="30" r={RING_R} fill="none" stroke="rgba(255,255,255,.25)" strokeWidth="6" />
-                  <circle
-                    cx="30"
-                    cy="30"
-                    r={RING_R}
-                    fill="none"
-                    stroke="#fff"
-                    strokeWidth="6"
-                    strokeLinecap="round"
-                    strokeDasharray={RING_C}
-                    strokeDashoffset={ringOffset}
-                    transform="rotate(-90 30 30)"
-                  />
-                  <text x="30" y="34" textAnchor="middle" fill="#fff" fontSize="13" fontWeight="700">
-                    {remainingPct}%
-                  </text>
-                </svg>
+                <ProgressRing pct={remainingPct} size={60} />
               </div>
             </div>
             <Link
