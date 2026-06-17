@@ -33,6 +33,8 @@ const LIMITERS = {
   community: make(8, "10 m"),
   // Analytics beacons (pageview/scroll/click batches) — generous, per IP.
   analytics: make(100, "1 m"),
+  // AI chat — anti-burst per user (daily cap is enforced separately by tier).
+  chat: make(20, "1 m"),
 } as const;
 
 export type RateKey = keyof typeof LIMITERS;

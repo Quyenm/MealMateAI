@@ -12,6 +12,7 @@ type Tier = {
   price_vnd: number;
   daily_scan_limit: number;
   suggestions_per_scan: number;
+  daily_chat_limit: number;
 };
 
 function Field({
@@ -65,6 +66,7 @@ export function AdminConfig({ tiers }: { tiers: Tier[] }) {
           price_vnd: Number(row.price_vnd) || 0,
           daily_scan_limit: Number(row.daily_scan_limit) || 0,
           suggestions_per_scan: Number(row.suggestions_per_scan) || 1,
+          daily_chat_limit: Number(row.daily_chat_limit) || 0,
         }),
       });
       if (!res.ok) throw new Error();
@@ -92,6 +94,7 @@ export function AdminConfig({ tiers }: { tiers: Tier[] }) {
               <Field label={t.admin.cfgPrice} value={row.price_vnd} onChange={(v) => edit(x.tier, "price_vnd", v)} />
               <Field label={t.admin.cfgScans} value={row.daily_scan_limit} onChange={(v) => edit(x.tier, "daily_scan_limit", v)} />
               <Field label={t.admin.cfgDishes} value={row.suggestions_per_scan} onChange={(v) => edit(x.tier, "suggestions_per_scan", v)} />
+              <Field label={t.admin.cfgChat} value={row.daily_chat_limit} onChange={(v) => edit(x.tier, "daily_chat_limit", v)} />
             </div>
             <Button size="sm" className="self-end" disabled={busy === x.tier} onClick={() => save(x.tier)}>
               {t.admin.cfgSave}

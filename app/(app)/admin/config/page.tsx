@@ -15,6 +15,7 @@ type TierRow = {
   price_vnd: number;
   daily_scan_limit: number;
   suggestions_per_scan: number;
+  daily_chat_limit: number;
 };
 
 export default async function AdminConfigPage() {
@@ -27,7 +28,7 @@ export default async function AdminConfigPage() {
   const admin = createAdminClient();
   const { data } = await admin
     .from("tier_limits")
-    .select("tier, display_label, price_vnd, daily_scan_limit, suggestions_per_scan")
+    .select("tier, display_label, price_vnd, daily_scan_limit, suggestions_per_scan, daily_chat_limit")
     .order("price_vnd");
 
   return (

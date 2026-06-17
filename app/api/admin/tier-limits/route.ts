@@ -12,6 +12,7 @@ const Body = z.object({
   price_vnd: z.number().int().min(0).max(100_000_000),
   daily_scan_limit: z.number().int().min(0).max(100_000),
   suggestions_per_scan: z.number().int().min(1).max(10),
+  daily_chat_limit: z.number().int().min(-1).max(100_000), // -1 = unlimited
 });
 
 /** Admin: edit a plan's price / quota / suggestions. Read live by the app. */
