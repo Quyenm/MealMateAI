@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Trash2, UtensilsCrossed, Flag } from "lucide-react";
 import { toast } from "sonner";
 import { useT, useLang } from "@/components/landing/i18n";
+import { Reveal } from "@/components/reveal";
 
 type Post = {
   id: string;
@@ -75,13 +76,14 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      {posts.map((p) => (
-        <article key={p.id} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
+      {posts.map((p, i) => (
+        <Reveal key={p.id} delay={Math.min(i, 8) * 60}>
+        <article className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
           <div className="relative aspect-square w-full overflow-hidden bg-muted sm:aspect-[4/3]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={p.image_url} alt={p.dish_title} className="h-full w-full object-cover" />
           </div>
-          <div className="flex flex-col gap-1.5 p-4">
+          <div className="flex flex-col gap-2 p-4">
             <div className="flex items-start justify-between gap-2">
               <span className="font-bold tracking-tight">{p.dish_title}</span>
               {p.mine ? (
@@ -108,11 +110,17 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
               )}
             </div>
             {p.note && <p className="text-sm text-muted-foreground">{p.note}</p>}
-            <p className="text-xs text-muted-foreground/80">
-              {p.author} · {timeAgo(p.created_at, en)}
-            </p>
+            <div className="flex items-center gap-2 pt-0.5">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#33afe0] to-[#15689a] text-[10px] font-bold text-white">
+                {(p.author || "?").trim().charAt(0).toUpperCase()}
+              </span>
+              <span className="text-xs text-muted-foreground">
+                {p.author} · {timeAgo(p.created_at, en)}
+              </span>
+            </div>
           </div>
         </article>
+        </Reveal>
       ))}
     </div>
   );

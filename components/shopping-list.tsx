@@ -56,7 +56,10 @@ export function ShoppingList({ initial }: { initial: Item[] }) {
     setItems((xs) => xs.filter((x) => !x.checked));
     await post({ action: "clearChecked" });
   }
-  const anyChecked = items.some((x) => x.checked);
+  const active = items.filter((x) => !x.checked);
+  const bought = items.filter((x) => x.checked);
+  const ordered = [...active, ...bought]; // still-to-buy first, bought sinks down
+  const anyChecked = bought.length > 0;
 
   return (
     <div className="flex flex-col gap-4">
@@ -78,21 +81,25 @@ export function ShoppingList({ initial }: { initial: Item[] }) {
         </div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {items.map((it) => (
+          {ordered.map((it) => (
             <li
               key={it.id}
-              className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-white/60"
+              className={`flex items-center gap-3 rounded-2xl bg-card p-3 shadow-card ring-1 ring-white/60 transition ${
+                it.checked ? "opacity-60" : ""
+              }`}
             >
-              <button type="button" onClick={() => toggle(it)} aria-label={it.name} className="-m-2 shrink-0 p-2">
+              <button type="button" onClick={() => toggle(it)} aria-label={it.name} className="-m-1.5 shrink-0 p-1.5">
                 <span
-                  className={`flex size-5 items-center justify-center rounded-md border transition ${
+                  className={`flex size-6 items-center justify-center rounded-full border-2 transition ${
                     it.checked ? "border-primary bg-primary text-primary-foreground" : "border-border"
                   }`}
                 >
                   {it.checked && <Check className="size-3.5" />}
                 </span>
               </button>
-              <span className={`min-w-0 flex-1 text-sm ${it.checked ? "text-muted-foreground line-through" : ""}`}>
+              <span
+                className={`min-w-0 flex-1 text-sm font-medium ${it.checked ? "text-muted-foreground line-through" : ""}`}
+              >
                 {it.name}
               </span>
               <button

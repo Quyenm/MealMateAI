@@ -88,10 +88,12 @@ export function FamilyView({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-center gap-3 rounded-3xl bg-gradient-to-br from-primary to-[#176f9c] p-5 text-white shadow-float">
-        <Users className="size-7" />
+      <div className="flex items-center gap-3 rounded-3xl bg-gradient-to-br from-[#33afe0] to-[#15689a] p-5 text-white shadow-float ring-1 ring-white/15">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-white/15">
+          <Users className="size-6" />
+        </span>
         <div>
-          <p className="text-lg font-bold">{household.name}</p>
+          <p className="text-lg font-bold tracking-tight">{household.name}</p>
           <p className="text-xs text-white/80">
             {members.length} {t.family.members}
           </p>
@@ -122,8 +124,11 @@ export function FamilyView({
         {members.map((m) => (
           <div
             key={m.user_id}
-            className="flex items-center gap-2 rounded-xl bg-card p-3 text-sm shadow-card ring-1 ring-white/60"
+            className="flex items-center gap-3 rounded-2xl bg-card p-3 text-sm shadow-card ring-1 ring-white/60"
           >
+            <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#33afe0] to-[#15689a] text-xs font-bold text-white">
+              {(m.email || "?").trim().charAt(0).toUpperCase()}
+            </span>
             <span className="min-w-0 flex-1 truncate">
               {m.email}
               {m.user_id === meId && <span className="ml-1 text-xs text-muted-foreground">({t.family.you})</span>}

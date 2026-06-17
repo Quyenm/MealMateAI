@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
@@ -78,9 +79,12 @@ export function OnboardingForm() {
 
   return (
     <div className="flex w-full max-w-md flex-col gap-5 rounded-3xl bg-card p-6 shadow-card ring-1 ring-white/60">
-      <div>
+      <div className="flex flex-col items-center gap-2 text-center">
+        <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#33afe0] to-[#15689a] text-white shadow-float">
+          <Sparkles className="size-7" />
+        </span>
         <h1 className="text-2xl font-bold tracking-tight">{t.onboarding.title}</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{t.onboarding.sub}</p>
+        <p className="text-sm text-muted-foreground">{t.onboarding.sub}</p>
       </div>
 
       <div className="flex flex-col gap-2">
