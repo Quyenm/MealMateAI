@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Apple, Flame, Calendar } from "lucide-react";
 import { toast } from "sonner";
 import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
@@ -38,15 +38,6 @@ export function FridgeList({ initial }: { initial: Item[] }) {
   const amountLabel = (a: string | null) =>
     a === "low" ? t.scan.amountLow : a === "medium" ? t.scan.amountMedium : a === "high" ? t.scan.amountHigh : null;
 
-  const sorted = [...items].sort((a, b) => {
-    const da = daysLeft(a.expiry_date);
-    const db = daysLeft(b.expiry_date);
-    if (da === null && db === null) return 0;
-    if (da === null) return 1;
-    if (db === null) return -1;
-    return da - db;
-  });
-
   async function add() {
     const name = draft.trim();
     if (!name) return;
@@ -68,6 +59,76 @@ export function FridgeList({ initial }: { initial: Item[] }) {
     await post({ action: "update", id: it.id, expiry_date: date || null });
   }
 
+  // Group by expiry urgency: "expiring/expired" surfaced first, the rest below.
+  const withDl = items.map((it) => ({ it, dl: daysLeft(it.expiry_date) }));
+  const expiring = withDl
+    .filter((x) => x.dl !== null && x.dl <= 3)
+    .sort((a, b) => (a.dl as number) - (b.dl as number));
+  const rest = withDl
+    .filter((x) => !(x.dl !== null && x.dl <= 3))
+    .sort((a, b) => {
+      if (a.dl === null && b.dl === null) return 0;
+      if (a.dl === null) return 1;
+      if (b.dl === null) return -1;
+      return a.dl - b.dl;
+    });
+
+  const row = (it: Item, dl: number | null) => {
+    const expired = dl !== null && dl < 0;
+    const soon = dl !== null && dl >= 0 && dl <= 3;
+    return (
+      <div
+        key={it.id}
+        className={`flex items-center gap-3 rounded-2xl bg-card p-2.5 shadow-card ring-1 ${
+          expired ? "ring-[#c8102e]/40" : soon ? "ring-warm-400/60" : "ring-white/60"
+        }`}
+      >
+        <span
+          className={`flex size-9 shrink-0 items-center justify-center rounded-xl ${
+            expired ? "bg-[#ffe2e9] text-[#c8102e]" : soon ? "bg-warm-100 text-[#b85a2e]" : "bg-primary/10 text-primary"
+          }`}
+        >
+          <Apple className="size-4" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-sm font-medium">
+            {it.name}
+            {amountLabel(it.amount) && <span className="font-normal text-muted-foreground"> · {amountLabel(it.amount)}</span>}
+          </p>
+          <p className={`text-xs ${expired ? "text-[#c8102e]" : soon ? "text-[#b85a2e]" : "text-muted-foreground"}`}>
+            {expired
+              ? t.fridge.expired
+              : soon
+                ? `${t.fridge.soon} · ${dl} ${t.fridge.daysUnit}`
+                : it.expiry_date
+                  ? `${dl} ${t.fridge.daysUnit}`
+                  : "—"}
+          </p>
+        </div>
+        <label
+          aria-label={t.fridge.expiry}
+          className="relative flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-lg text-muted-foreground/70 transition hover:bg-muted hover:text-foreground"
+        >
+          <Calendar className="size-4" />
+          <input
+            type="date"
+            value={it.expiry_date ?? ""}
+            onChange={(e) => setExpiry(it, e.target.value)}
+            className="absolute inset-0 cursor-pointer opacity-0"
+          />
+        </label>
+        <button
+          type="button"
+          onClick={() => remove(it)}
+          aria-label="remove"
+          className="-m-1 shrink-0 rounded-md p-1.5 text-muted-foreground/60 transition hover:text-foreground"
+        >
+          <X className="size-4" />
+        </button>
+      </div>
+    );
+  };
+
   return (
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
@@ -87,51 +148,22 @@ export function FridgeList({ initial }: { initial: Item[] }) {
           {t.fridge.empty}
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {sorted.map((it) => {
-            const dl = daysLeft(it.expiry_date);
-            const expired = dl !== null && dl < 0;
-            const soon = dl !== null && dl >= 0 && dl <= 3;
-            return (
-              <li
-                key={it.id}
-                className={`flex flex-wrap items-center gap-2 rounded-xl bg-card p-3 shadow-card ring-1 ${
-                  expired ? "ring-[#c8102e]/40" : soon ? "ring-warm-400/60" : "ring-white/60"
-                }`}
-              >
-                <span className="font-medium">{it.name}</span>
-                {amountLabel(it.amount) && (
-                  <span className="text-xs text-muted-foreground">· {amountLabel(it.amount)}</span>
-                )}
-                {expired && (
-                  <span className="rounded-full bg-[#ffe2e9] px-2 py-0.5 text-[11px] font-medium text-[#c8102e]">
-                    {t.fridge.expired}
-                  </span>
-                )}
-                {soon && (
-                  <span className="rounded-full bg-warm-50 px-2 py-0.5 text-[11px] font-medium text-[#b85a2e]">
-                    {t.fridge.soon} · {dl} {t.fridge.daysUnit}
-                  </span>
-                )}
-                <input
-                  type="date"
-                  value={it.expiry_date ?? ""}
-                  onChange={(e) => setExpiry(it, e.target.value)}
-                  aria-label={t.fridge.expiry}
-                  className="ml-auto rounded-lg border border-border bg-background px-2 py-1 text-xs text-muted-foreground"
-                />
-                <button
-                  type="button"
-                  onClick={() => remove(it)}
-                  aria-label="remove"
-                  className="-m-2 shrink-0 rounded-md p-2 text-muted-foreground/60 transition hover:text-foreground"
-                >
-                  <X className="size-4" />
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="flex flex-col gap-5">
+          {expiring.length > 0 && (
+            <section className="flex flex-col gap-2">
+              <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.12em] text-[#b85a2e]">
+                <Flame className="size-3.5" /> {t.fridge.soon} · {expiring.length}
+              </p>
+              {expiring.map((x) => row(x.it, x.dl))}
+            </section>
+          )}
+          <section className="flex flex-col gap-2">
+            {expiring.length > 0 && (
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">{t.shell.fridge}</p>
+            )}
+            <div className="grid gap-2 sm:grid-cols-2">{rest.map((x) => row(x.it, x.dl))}</div>
+          </section>
+        </div>
       )}
     </div>
   );
