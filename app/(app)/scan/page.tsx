@@ -375,7 +375,7 @@ export default function ScanPage() {
             </div>
           ) : (
             <div className="flex flex-col items-center gap-3 py-6 text-center">
-              <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+              <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#33afe0] to-[#15689a] text-white shadow-float">
                 <Camera className="size-7" />
               </span>
               <p className="max-w-xs text-sm text-muted-foreground">{t.scan.captureHint}</p>
@@ -408,7 +408,7 @@ export default function ScanPage() {
       {/* STEP: loading */}
       {(step === "recognizing" || step === "suggesting") && (
         <div className="flex flex-col items-center gap-4 rounded-3xl bg-card p-10 shadow-card ring-1 ring-white/60">
-          <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+          <span className="flex size-14 items-center justify-center rounded-2xl bg-gradient-to-br from-[#33afe0] to-[#15689a] text-white shadow-float">
             <Loader2 className="size-7 animate-spin" />
           </span>
           <p className="text-sm font-medium text-muted-foreground">
