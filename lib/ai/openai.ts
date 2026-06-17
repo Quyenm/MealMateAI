@@ -224,8 +224,9 @@ export async function streamCookChat(history: ChatTurn[], contextText: string) {
     model: MODEL,
     stream: true,
     stream_options: { include_usage: true },
-    max_tokens: 600,
-    temperature: 0.5,
+    // gpt-5.x uses max_completion_tokens (not max_tokens) and rejects a custom
+    // temperature — keep params minimal so it works across model generations.
+    max_completion_tokens: 700,
     messages: [
       { role: "system", content: CHAT_SYSTEM },
       {

@@ -3,6 +3,7 @@ import { getCurrentUser, getIsAdmin } from "@/lib/auth";
 import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
+import { ChatWidget } from "@/components/chat-widget";
 
 /**
  * Authenticated app shell. Responsive:
@@ -33,6 +34,7 @@ async function AppNav() {
     <>
       <AppSidebar isAdmin={isAdmin} />
       <BottomNav isAdmin={isAdmin} />
+      <ChatWidget />
     </>
   );
 }
