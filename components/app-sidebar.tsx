@@ -19,7 +19,7 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
     : ITEMS;
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-card/60 backdrop-blur lg:flex">
+    <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-border bg-card/70 backdrop-blur-xl lg:flex">
       <Link href="/home" className="flex items-center gap-2.5 px-5 py-5">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/logo.jpg" alt="" className="size-9 rounded-xl ring-1 ring-border" />
@@ -35,9 +35,9 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition ${
+              className={`flex items-center gap-3 rounded-2xl px-3 py-2.5 text-sm font-medium transition ${
                 active
-                  ? "bg-primary/10 text-primary"
+                  ? "bg-primary/10 text-primary shadow-sm ring-1 ring-primary/15"
                   : "text-muted-foreground hover:bg-muted hover:text-foreground"
               }`}
             >

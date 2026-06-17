@@ -58,17 +58,17 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
         </div>
       )}
 
-      {/* bottom quick bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-background/95 backdrop-blur lg:hidden">
-        <div className="mx-auto flex w-full max-w-md items-stretch justify-around">
+      {/* bottom quick bar — floating glass pill */}
+      <nav className="fixed inset-x-0 bottom-0 z-40 px-3 pb-3 lg:hidden">
+        <div className="mx-auto flex w-full max-w-md items-stretch justify-around rounded-3xl border border-white/60 bg-card/80 p-1 shadow-float backdrop-blur-xl">
           {quick.map(({ href, key, Icon }) => {
             const active = isActive(href);
             return (
               <Link
                 key={href}
                 href={href}
-                className={`flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] transition-colors ${
-                  active ? "text-primary" : "text-muted-foreground hover:text-foreground"
+                className={`flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium transition ${
+                  active ? "bg-primary/10 text-primary" : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="size-5" />
@@ -79,7 +79,7 @@ export function BottomNav({ isAdmin }: { isAdmin: boolean }) {
           <button
             type="button"
             onClick={() => setOpen(true)}
-            className="flex flex-1 flex-col items-center gap-0.5 py-2.5 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+            className="flex flex-1 flex-col items-center gap-0.5 rounded-2xl py-2 text-[11px] font-medium text-muted-foreground transition hover:text-foreground"
           >
             <Menu className="size-5" />
             {t.shell.menu}

@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/app-header";
 import { AppSidebar } from "@/components/app-sidebar";
 import { BottomNav } from "@/components/bottom-nav";
 import { ChatWidget } from "@/components/chat-widget";
+import { Atmosphere, Grain } from "@/components/landing/atmosphere";
 
 /**
  * Authenticated app shell. Responsive:
@@ -15,7 +16,9 @@ import { ChatWidget } from "@/components/chat-widget";
  */
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-full flex-1 flex-col lg:pl-64">
+    <div className="relative flex min-h-full flex-1 flex-col lg:pl-64">
+      <Atmosphere />
+      <Grain />
       <AppHeader />
       <div className="flex flex-1 flex-col pb-20 lg:pb-0">{children}</div>
       <Suspense fallback={<NavFallback />}>
