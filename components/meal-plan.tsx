@@ -114,8 +114,10 @@ export function MealPlan({
                         key={it.id}
                         className="flex items-center gap-2.5 rounded-2xl bg-background p-2 ring-1 ring-white/60"
                       >
-                        <DishCover image={it.dish.image} className="size-10 shrink-0 rounded-xl" iconClassName="size-4" />
-                        <span className="flex-1 text-sm font-medium">{dTitle(it.dish)}</span>
+                        <div className="size-11 shrink-0 overflow-hidden rounded-xl">
+                          <DishCover image={it.dish.image} className="h-full w-full" iconClassName="size-4" />
+                        </div>
+                        <span className="min-w-0 flex-1 truncate text-sm font-medium">{dTitle(it.dish)}</span>
                         <button
                           type="button"
                           onClick={() => remove(it)}
@@ -176,8 +178,10 @@ export function MealPlan({
                       }}
                       className="flex items-center gap-3 rounded-2xl bg-background p-3 text-left ring-1 ring-white/60 transition hover:bg-primary/5 hover:ring-primary/30"
                     >
-                      <DishCover image={f.dish.image} className="size-12 shrink-0 rounded-xl" iconClassName="size-5" />
-                      <span className="text-sm font-medium">{dTitle(f.dish)}</span>
+                      <div className="size-12 shrink-0 overflow-hidden rounded-xl">
+                        <DishCover image={f.dish.image} className="h-full w-full" iconClassName="size-5" />
+                      </div>
+                      <span className="min-w-0 flex-1 truncate text-sm font-medium">{dTitle(f.dish)}</span>
                     </button>
                   ))}
                 </div>
