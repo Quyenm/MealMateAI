@@ -57,7 +57,7 @@ export function FamilyView({
     return (
       <div className="flex flex-col gap-4">
         <p className="text-sm text-muted-foreground">{t.family.subtitle}</p>
-        <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
           <span className="font-semibold">{t.family.createTitle}</span>
           <div className="flex gap-2">
             <Input value={name} onChange={(e) => setName(e.target.value)} placeholder={t.family.createPlaceholder} />
@@ -69,7 +69,7 @@ export function FamilyView({
             </Button>
           </div>
         </div>
-        <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
           <span className="font-semibold">{t.family.joinTitle}</span>
           <div className="flex gap-2">
             <Input value={code} onChange={(e) => setCode(e.target.value)} placeholder={t.family.joinPlaceholder} />
@@ -98,7 +98,7 @@ export function FamilyView({
         </div>
       </div>
 
-      <div className="flex items-center justify-between gap-2 rounded-2xl bg-card p-4 shadow-card ring-1 ring-border/60">
+      <div className="flex items-center justify-between gap-2 rounded-2xl bg-card p-4 shadow-card ring-1 ring-white/60">
         <div>
           <p className="text-xs text-muted-foreground">{t.family.code}</p>
           <p className="font-mono text-lg font-bold tracking-widest">{household.join_code}</p>
@@ -122,7 +122,7 @@ export function FamilyView({
         {members.map((m) => (
           <div
             key={m.user_id}
-            className="flex items-center gap-2 rounded-xl bg-card p-3 text-sm shadow-card ring-1 ring-border/60"
+            className="flex items-center gap-2 rounded-xl bg-card p-3 text-sm shadow-card ring-1 ring-white/60"
           >
             <span className="min-w-0 flex-1 truncate">
               {m.email}

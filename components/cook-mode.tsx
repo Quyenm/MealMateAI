@@ -120,7 +120,7 @@ export function CookMode({
             </p>
           </div>
 
-          <div className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-card p-5 text-left shadow-card ring-1 ring-border/60">
+          <div className="flex w-full max-w-md flex-col gap-3 rounded-3xl bg-card p-5 text-left shadow-card ring-1 ring-white/60">
             <span className="text-sm font-semibold">{t.cook.shareTitle}</span>
             <input
               ref={photoRef}
@@ -192,7 +192,7 @@ export function CookMode({
         </span>
         <p className="max-w-xl text-2xl font-semibold leading-snug">{steps[step]}</p>
 
-        <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
           <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
             {t.cook.timer}
           </span>

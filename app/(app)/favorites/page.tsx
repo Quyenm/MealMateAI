@@ -28,7 +28,7 @@ export default async function FavoritesPage() {
     <main className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-4 p-4 lg:p-8">
       <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
       {items.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-8 text-center shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-8 text-center shadow-card ring-1 ring-white/60">
           <p className="text-sm text-muted-foreground">{t.empty}</p>
           <Link href="/scan" className={buttonVariants({ className: "shadow-float" })}>
             {t.browse}

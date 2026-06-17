@@ -83,7 +83,7 @@ export function FridgeList({ initial }: { initial: Item[] }) {
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
           {t.fridge.empty}
         </div>
       ) : (
@@ -96,7 +96,7 @@ export function FridgeList({ initial }: { initial: Item[] }) {
               <li
                 key={it.id}
                 className={`flex flex-wrap items-center gap-2 rounded-xl bg-card p-3 shadow-card ring-1 ${
-                  expired ? "ring-[#c8102e]/40" : soon ? "ring-warm-400/60" : "ring-border/60"
+                  expired ? "ring-[#c8102e]/40" : soon ? "ring-warm-400/60" : "ring-white/60"
                 }`}
               >
                 <span className="font-medium">{it.name}</span>

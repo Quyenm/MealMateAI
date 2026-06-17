@@ -60,7 +60,7 @@ export default async function UpgradePage() {
           <div
             key={tier.tier}
             className={`relative flex flex-col gap-4 rounded-3xl bg-card p-5 ring-1 transition ${
-              isRec ? "shadow-float ring-2 ring-primary" : "shadow-card ring-border/60"
+              isRec ? "shadow-float ring-2 ring-primary" : "shadow-card ring-white/60"
             }`}
           >
             {isRec && (

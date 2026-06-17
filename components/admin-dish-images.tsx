@@ -35,7 +35,7 @@ export function AdminDishImages({ rows }: { rows: Row[] }) {
 
   if (!rows.length) {
     return (
-      <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+      <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
         {t.admin.imgEmpty}
       </div>
     );
@@ -46,7 +46,7 @@ export function AdminDishImages({ rows }: { rows: Row[] }) {
       {rows.map((r) => (
         <div
           key={r.title_key}
-          className="flex flex-col overflow-hidden rounded-2xl bg-card shadow-card ring-1 ring-border/60"
+          className="flex flex-col overflow-hidden rounded-2xl bg-card shadow-card ring-1 ring-white/60"
         >
           <div className="relative aspect-square w-full bg-muted">
             {r.image_url ? (

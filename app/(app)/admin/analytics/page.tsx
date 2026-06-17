@@ -134,7 +134,7 @@ export default async function AdminAnalyticsPage({
           return (
             <div
               key={c.label}
-              className="flex flex-col gap-1 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
+              className="flex flex-col gap-1 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60"
             >
               <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
                 <Icon className="size-4" /> {c.label}
@@ -154,7 +154,7 @@ export default async function AdminAnalyticsPage({
         format={num}
       />
 
-      <div className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60">
         <span className="text-sm font-semibold">{t.anSources}</span>
         {sources.length === 0 && <span className="text-sm text-muted-foreground">—</span>}
         {sources.map((src) => (

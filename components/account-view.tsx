@@ -69,7 +69,7 @@ export function AccountView({ email }: { email: string }) {
   return (
     <div className="flex flex-col gap-4">
       {/* password */}
-      <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
         <span className="text-sm font-semibold">{t.account.pwLabel}</span>
         <div className="flex flex-col gap-2 sm:flex-row">
           <Input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="••••••" autoComplete="new-password" />
@@ -80,7 +80,7 @@ export function AccountView({ email }: { email: string }) {
       </div>
 
       {/* email */}
-      <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col gap-2 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
         <span className="text-sm font-semibold">{t.account.emailLabel}</span>
         <p className="text-xs text-muted-foreground">{email}</p>
         <div className="flex flex-col gap-2 sm:flex-row">

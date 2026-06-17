@@ -45,12 +45,12 @@ export default async function PayPage({
         {t.title} — {ti.display_label}
       </h1>
 
-      <div className="flex flex-col items-center gap-4 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col items-center gap-4 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
         <p className="text-sm font-semibold">{t.heading}</p>
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src="/momo-qr.jpg" alt="" className="w-56 rounded-2xl ring-1 ring-border" />
 
-        <dl className="w-full divide-y divide-border/60 overflow-hidden rounded-2xl bg-background text-sm ring-1 ring-border/60">
+        <dl className="w-full divide-y divide-border/60 overflow-hidden rounded-2xl bg-background text-sm ring-1 ring-white/60">
           <div className="flex items-center justify-between gap-3 px-4 py-2.5">
             <dt className="shrink-0 text-muted-foreground">{t.receiver}</dt>
             <dd className="min-w-0 break-words text-right font-medium">

@@ -66,7 +66,7 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
 
   if (!posts.length) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-3xl bg-card p-10 text-center shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col items-center gap-2 rounded-3xl bg-card p-10 text-center shadow-card ring-1 ring-white/60">
         <UtensilsCrossed className="size-8 text-[#b85a2e]/40" />
         <p className="text-sm text-muted-foreground">{t.community.empty}</p>
       </div>
@@ -76,7 +76,7 @@ export function CommunityFeed({ posts }: { posts: Post[] }) {
   return (
     <div className="flex flex-col gap-4">
       {posts.map((p) => (
-        <article key={p.id} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+        <article key={p.id} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
           <div className="relative aspect-square w-full overflow-hidden bg-muted sm:aspect-[4/3]">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={p.image_url} alt={p.dish_title} className="h-full w-full object-cover" />

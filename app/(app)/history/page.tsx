@@ -67,7 +67,7 @@ export default async function HistoryPage() {
       <h1 className="text-xl font-bold tracking-tight">{t.title}</h1>
 
       {scans.length === 0 && (
-        <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-8 text-center shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col items-center gap-3 rounded-3xl bg-card p-8 text-center shadow-card ring-1 ring-white/60">
           <p className="text-sm text-muted-foreground">{t.empty}</p>
           <Link href="/scan" className={buttonVariants({ className: "shadow-float" })}>
             {t.firstScan}
@@ -82,7 +82,7 @@ export default async function HistoryPage() {
         return (
           <div
             key={sc.id}
-            className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
+            className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60"
           >
             <p className="text-xs font-medium text-muted-foreground">
               {new Date(sc.created_at).toLocaleString(dateLocale, { timeZone: "Asia/Ho_Chi_Minh" })}
@@ -93,7 +93,7 @@ export default async function HistoryPage() {
             </p>
             <div className="flex flex-col gap-2">
               {dishes.map((d, i) => (
-                <details key={i} className="group rounded-xl bg-background p-3 ring-1 ring-border/60">
+                <details key={i} className="group rounded-xl bg-background p-3 ring-1 ring-white/60">
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-sm font-medium">
                     <span>
                       {dTitle(d)}

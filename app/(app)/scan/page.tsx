@@ -367,7 +367,7 @@ export default function ScanPage() {
 
       {/* STEP: capture */}
       {step === "capture" && (
-        <div className="flex flex-col gap-4 rounded-3xl bg-card p-6 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col gap-4 rounded-3xl bg-card p-6 shadow-card ring-1 ring-white/60">
           {preview ? (
             <div className="overflow-hidden rounded-2xl ring-1 ring-border">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -407,7 +407,7 @@ export default function ScanPage() {
 
       {/* STEP: loading */}
       {(step === "recognizing" || step === "suggesting") && (
-        <div className="flex flex-col items-center gap-4 rounded-3xl bg-card p-10 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col items-center gap-4 rounded-3xl bg-card p-10 shadow-card ring-1 ring-white/60">
           <span className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
             <Loader2 className="size-7 animate-spin" />
           </span>
@@ -419,7 +419,7 @@ export default function ScanPage() {
 
       {/* STEP: confirm */}
       {step === "confirm" && (
-        <div className="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col gap-4 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60">
           <div>
             <h2 className="font-bold tracking-tight">{t.scan.confirmTitle}</h2>
             <p className="mt-0.5 text-sm text-muted-foreground">{t.scan.confirmHint}</p>
@@ -542,7 +542,7 @@ export default function ScanPage() {
       {step === "results" && selectedDish === null && (
         <div className="flex flex-col gap-3">
           {dishes.length === 0 && (
-            <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+            <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
               {t.scan.resultsEmpty}
             </div>
           )}
@@ -552,7 +552,7 @@ export default function ScanPage() {
                 key={i}
                 type="button"
                 onClick={() => openDish(i)}
-                className="group flex flex-col overflow-hidden rounded-3xl bg-card text-left shadow-card ring-1 ring-border/60 transition hover:-translate-y-0.5 hover:shadow-float"
+                className="group flex flex-col overflow-hidden rounded-3xl bg-card text-left shadow-card ring-1 ring-white/60 transition hover:-translate-y-0.5 hover:shadow-float"
               >
                 <DishCover image={d.image} className="aspect-[16/10]">
                   {d.cookable_now === false && (
@@ -594,7 +594,7 @@ export default function ScanPage() {
             <ChevronLeft className="size-4" /> {t.scan.backToList}
           </button>
 
-          <div className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+          <div className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
             <DishCover image={selected.image} className="aspect-[16/9]" credit />
             <div className="flex flex-col gap-3 p-5">
               <div className="flex flex-wrap items-center justify-between gap-2">

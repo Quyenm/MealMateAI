@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { useT } from "@/components/landing/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { AnimatedNumber } from "@/components/animated-number";
 
 type Log = {
   id: string;
@@ -48,10 +49,10 @@ export function NutritionView({ items: initial, goal: initialGoal }: { items: Lo
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="rounded-3xl bg-gradient-to-br from-primary to-[#176f9c] p-5 text-white shadow-float">
+      <div className="rounded-3xl bg-gradient-to-br from-[#33afe0] to-[#15689a] p-5 text-white shadow-float ring-1 ring-white/15">
         <span className="text-sm text-white/80">{t.nutrition.today}</span>
-        <p className="mt-1 text-4xl font-extrabold leading-none">
-          {totals.kcal}
+        <p className="mt-1 text-5xl font-extrabold leading-none tracking-tight">
+          <AnimatedNumber value={totals.kcal} />
           <span className="text-lg font-medium text-white/70">
             {" "}
             {t.scan.kcalUnit}
@@ -85,7 +86,7 @@ export function NutritionView({ items: initial, goal: initialGoal }: { items: Lo
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
           {t.nutrition.empty}
         </div>
       ) : (
@@ -93,7 +94,7 @@ export function NutritionView({ items: initial, goal: initialGoal }: { items: Lo
           {items.map((it) => (
             <li
               key={it.id}
-              className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-border/60"
+              className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-white/60"
             >
               <span className="flex-1 text-sm font-medium">{it.dish_title}</span>
               <span className="shrink-0 text-xs text-muted-foreground">

@@ -14,7 +14,7 @@ export function AdminBarChart({
 }) {
   const max = Math.max(1, ...data);
   return (
-    <div className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60">
+    <div className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60">
       <div className="flex items-baseline justify-between">
         <span className="text-sm font-semibold">{title}</span>
         <span className="text-xs font-medium text-primary">{total}</span>

@@ -58,12 +58,12 @@ export function AdminPayments({ payments, numLocale }: { payments: Payment[]; nu
       </div>
 
       {shown.length === 0 && (
-        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
           {t.admin.noPayments}
         </div>
       )}
 
-      <div className="flex flex-col divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
         {shown.map((p) => (
           <div key={p.id} className="flex items-center gap-3 p-3 text-sm">
             <div className="min-w-0 flex-1">

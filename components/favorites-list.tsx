@@ -100,7 +100,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
 
   if (!items.length) {
     return (
-      <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+      <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
         {t.favorites.empty}
       </div>
     );
@@ -113,7 +113,7 @@ export function FavoritesList({ initial }: { initial: SavedDish[] }) {
         const d = s.dish;
         const isOpen = open === s.id;
         return (
-          <div key={s.id} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+          <div key={s.id} className="overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
             <DishCover image={d.image} className="aspect-[16/9]" credit />
             <div className="flex flex-col gap-2 p-4">
               <div className="flex items-start justify-between gap-2">

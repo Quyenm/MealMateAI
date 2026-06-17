@@ -85,7 +85,7 @@ export function MealPlan({
               <div
                 key={date}
                 className={`flex flex-col gap-2 rounded-3xl bg-card p-4 shadow-card ring-1 ${
-                  isToday ? "ring-primary" : "ring-border/60"
+                  isToday ? "ring-primary" : "ring-white/60"
                 }`}
               >
                 <span className="font-semibold capitalize">
@@ -102,7 +102,7 @@ export function MealPlan({
                   dayItems.map((it) => (
                     <div
                       key={it.id}
-                      className="flex items-center gap-2 rounded-xl bg-background p-2 ring-1 ring-border/60"
+                      className="flex items-center gap-2 rounded-xl bg-background p-2 ring-1 ring-white/60"
                     >
                       <DishCover
                         image={it.dish.image}
@@ -160,7 +160,7 @@ export function MealPlan({
                       add(pickFor, f.dish);
                       setPickFor(null);
                     }}
-                    className="flex items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-card ring-1 ring-border/60 transition hover:shadow-float"
+                    className="flex items-center gap-3 rounded-2xl bg-card p-3 text-left shadow-card ring-1 ring-white/60 transition hover:shadow-float"
                   >
                     <DishCover
                       image={f.dish.image}

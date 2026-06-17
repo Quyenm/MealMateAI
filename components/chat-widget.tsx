@@ -79,7 +79,7 @@ export function ChatWidget() {
   }
 
   return (
-    <div className="fixed inset-x-3 bottom-3 top-16 z-50 flex flex-col overflow-hidden rounded-3xl bg-card shadow-float ring-1 ring-border/60 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:top-auto sm:h-[600px] sm:max-h-[82vh] sm:w-[380px]">
+    <div className="fixed inset-x-3 bottom-3 top-16 z-50 flex flex-col overflow-hidden rounded-3xl bg-card shadow-float ring-1 ring-white/60 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:top-auto sm:h-[600px] sm:max-h-[82vh] sm:w-[380px]">
       <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-3">
         <div className="flex items-center gap-2">
           <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-primary">

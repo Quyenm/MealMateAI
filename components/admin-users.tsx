@@ -42,12 +42,12 @@ export function AdminUsers({ users, numLocale }: { users: User[]; numLocale: str
       <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder={t.admin.searchUsers} />
 
       {shown.length === 0 && (
-        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
           {t.admin.noUsers}
         </div>
       )}
 
-      <div className="flex flex-col divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-border/60">
+      <div className="flex flex-col divide-y divide-border overflow-hidden rounded-3xl bg-card shadow-card ring-1 ring-white/60">
         {shown.map((u) => (
           <div key={u.id} className="flex items-center gap-3 p-3 text-sm">
             <div className="min-w-0 flex-1">

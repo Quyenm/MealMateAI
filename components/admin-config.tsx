@@ -86,7 +86,7 @@ export function AdminConfig({ tiers }: { tiers: Tier[] }) {
         return (
           <div
             key={x.tier}
-            className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
+            className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60"
           >
             <span className="font-bold uppercase tracking-tight">{x.tier}</span>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">

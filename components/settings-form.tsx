@@ -138,7 +138,7 @@ export function SettingsForm({ initial }: { initial: Prefs }) {
         <p className="mt-1 text-sm text-muted-foreground">{t.sub}</p>
       </div>
 
-      <div className="flex flex-col gap-6 rounded-3xl bg-card p-5 shadow-card ring-1 ring-border/60 lg:p-6">
+      <div className="flex flex-col gap-6 rounded-3xl bg-card p-5 shadow-card ring-1 ring-white/60 lg:p-6">
         <Segmented
           label={t.dietary}
           value={p.dietary_pref}

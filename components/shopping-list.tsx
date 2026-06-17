@@ -73,7 +73,7 @@ export function ShoppingList({ initial }: { initial: Item[] }) {
       </div>
 
       {items.length === 0 ? (
-        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+        <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
           {t.shopping.empty}
         </div>
       ) : (
@@ -81,7 +81,7 @@ export function ShoppingList({ initial }: { initial: Item[] }) {
           {items.map((it) => (
             <li
               key={it.id}
-              className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-border/60"
+              className="flex items-center gap-3 rounded-xl bg-card p-3 shadow-card ring-1 ring-white/60"
             >
               <button type="button" onClick={() => toggle(it)} aria-label={it.name} className="-m-2 shrink-0 p-2">
                 <span

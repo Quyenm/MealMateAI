@@ -30,7 +30,7 @@ function Stat({
   sub?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60">
+    <div className="flex flex-col gap-1 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60">
       <span className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
         <Icon className="size-4" /> {label}
       </span>
@@ -155,7 +155,7 @@ export default async function AdminPage() {
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
-        <div className="flex flex-col gap-2 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col gap-2 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60">
           <span className="text-sm font-semibold">{t.soldByTier}</span>
           {sortTiers(Object.keys(soldByTier)).map((tier) => (
             <div key={tier} className="flex items-center justify-between text-sm">
@@ -168,7 +168,7 @@ export default async function AdminPage() {
           {!Object.keys(soldByTier).length && <span className="text-sm text-muted-foreground">—</span>}
         </div>
 
-        <div className="flex flex-col gap-2 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60">
+        <div className="flex flex-col gap-2 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60">
           <span className="text-sm font-semibold">{t.usersByTier}</span>
           {sortTiers(Object.keys(usersByTier)).map((tier) => (
             <div key={tier} className="flex items-center justify-between text-sm">
@@ -188,7 +188,7 @@ export default async function AdminPage() {
         </div>
 
         {rows.length === 0 && (
-          <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-border/60">
+          <div className="rounded-3xl bg-card p-8 text-center text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
             {t.empty}
           </div>
         )}
@@ -199,7 +199,7 @@ export default async function AdminPage() {
             return (
               <div
                 key={p.id}
-                className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-border/60"
+                className="flex flex-col gap-3 rounded-3xl bg-card p-4 shadow-card ring-1 ring-white/60"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="font-bold tracking-tight">{p.tier_purchased.toUpperCase()}</span>

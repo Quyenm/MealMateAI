@@ -77,7 +77,7 @@ export function OnboardingForm() {
   }
 
   return (
-    <div className="flex w-full max-w-md flex-col gap-5 rounded-3xl bg-card p-6 shadow-card ring-1 ring-border/60">
+    <div className="flex w-full max-w-md flex-col gap-5 rounded-3xl bg-card p-6 shadow-card ring-1 ring-white/60">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">{t.onboarding.title}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{t.onboarding.sub}</p>
