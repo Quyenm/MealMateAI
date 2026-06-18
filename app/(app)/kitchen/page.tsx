@@ -22,7 +22,7 @@ export default async function KitchenPage() {
   const t = STR[await getLocale()].kitchen;
 
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 p-4 lg:p-8">
+    <main className="mx-auto w-full max-w-5xl flex-1 p-4 lg:p-8">
       {allowed ? (
         <KitchenHome />
       ) : (
