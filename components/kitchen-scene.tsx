@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
+import { Suspense, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame, type ThreeElements } from "@react-three/fiber";
-import { OrbitControls, ContactShadows } from "@react-three/drei";
+import { OrbitControls, ContactShadows, useGLTF } from "@react-three/drei";
 import { RotateCcw, X, Star } from "lucide-react";
 import * as THREE from "three";
 import { motion } from "motion/react";
@@ -17,128 +17,72 @@ function ingType(name: string): IngType {
   if (/(ca chua|tomato)/.test(n)) return "tomato";
   if (/(trung|egg)/.test(n)) return "egg";
   if (/(toi|garlic)/.test(n)) return "garlic";
-  if (/(hanh|scallion|onion|spring)/.test(n)) return "scallion";
+  if (/(hanh|scallion|onion|spring|leek)/.test(n)) return "scallion";
   if (/(thit|pork|beef|meat|ba chi|suon|nac|ga|bo)/.test(n)) return "meat";
-  if (/(ot|chili|chilli)/.test(n)) return "chili";
+  if (/(ot|chili|chilli|pepper)/.test(n)) return "chili";
   if (/(mam|muoi|duong|tieu|sauce|salt|sugar|nuoc hang|caramel|gia vi|season|hat nem|dau)/.test(n)) return "bottle";
   if (/(rau|spinach|cai|cabbage|veg|muong|xa lach)/.test(n)) return "greens";
   return "generic";
 }
-const TYPE_COLOR: Record<IngType, string> = {
-  tomato: "#e2483f", egg: "#fff3d6", garlic: "#f1e9d8", scallion: "#3f8f2f",
-  meat: "#c0564a", chili: "#d62828", bottle: "#9a6b3a", greens: "#3b8f2f", generic: "#e0a35a",
-};
 const V3 = (a: number[]) => a as [number, number, number];
 
-/** Whole, recognisable ingredient (used as the on-counter actor). */
-function IngredientMesh({ type }: { type: IngType }) {
-  const c = TYPE_COLOR[type];
-  if (type === "tomato")
-    return (
-      <group>
-        <mesh castShadow scale={V3([1, 0.9, 1])}><sphereGeometry args={[0.32, 24, 24]} /><meshStandardMaterial color={c} roughness={0.35} /></mesh>
-        <mesh position={V3([0, 0.3, 0])}><coneGeometry args={[0.1, 0.14, 6]} /><meshStandardMaterial color="#3b6d11" roughness={0.6} /></mesh>
-      </group>
-    );
-  if (type === "egg")
-    return <mesh castShadow scale={V3([0.82, 1.08, 0.82])}><sphereGeometry args={[0.3, 24, 24]} /><meshStandardMaterial color={c} roughness={0.5} /></mesh>;
-  if (type === "garlic")
-    return (
-      <group>
-        <mesh castShadow scale={V3([0.8, 1, 0.8])}><sphereGeometry args={[0.3, 20, 20]} /><meshStandardMaterial color={c} roughness={0.65} /></mesh>
-        <mesh position={V3([0, 0.28, 0])}><coneGeometry args={[0.07, 0.16, 8]} /><meshStandardMaterial color="#e8dcc2" roughness={0.7} /></mesh>
-      </group>
-    );
-  if (type === "scallion")
-    return (
-      <group>
-        {[-0.12, 0, 0.12].map((x, i) => (
-          <mesh key={i} position={V3([x, 0.25, 0])} castShadow><cylinderGeometry args={[0.05, 0.06, 0.9 - i * 0.1, 8]} /><meshStandardMaterial color={i === 1 ? "#4fa336" : "#3f8f2f"} roughness={0.6} /></mesh>
-        ))}
-        <mesh position={V3([0, -0.18, 0])}><cylinderGeometry args={[0.09, 0.09, 0.14, 8]} /><meshStandardMaterial color="#f5f0e0" /></mesh>
-      </group>
-    );
-  if (type === "meat")
-    return (
-      <group>
-        <mesh castShadow><boxGeometry args={[0.7, 0.22, 0.45]} /><meshStandardMaterial color={c} roughness={0.55} /></mesh>
-        <mesh position={V3([0, 0.14, 0])}><boxGeometry args={[0.7, 0.08, 0.45]} /><meshStandardMaterial color="#f0d9c8" roughness={0.6} /></mesh>
-      </group>
-    );
-  if (type === "chili")
-    return (
-      <group rotation={V3([0, 0, Math.PI / 5])}>
-        <mesh castShadow><cylinderGeometry args={[0.07, 0.12, 0.6, 12]} /><meshStandardMaterial color={c} roughness={0.35} /></mesh>
-        <mesh position={V3([0, 0.36, 0])}><coneGeometry args={[0.06, 0.16, 8]} /><meshStandardMaterial color="#3b6d11" /></mesh>
-      </group>
-    );
-  if (type === "bottle")
-    return (
-      <group>
-        <mesh castShadow><cylinderGeometry args={[0.2, 0.22, 0.5, 16]} /><meshStandardMaterial color={c} roughness={0.25} transparent opacity={0.85} /></mesh>
-        <mesh position={V3([0, 0.34, 0])}><cylinderGeometry args={[0.08, 0.1, 0.2, 12]} /><meshStandardMaterial color={c} transparent opacity={0.85} /></mesh>
-        <mesh position={V3([0, 0.48, 0])}><cylinderGeometry args={[0.09, 0.09, 0.1, 12]} /><meshStandardMaterial color="#2a2622" /></mesh>
-      </group>
-    );
-  if (type === "greens")
-    return (
-      <group>
-        {([[-0.15, 0, 0], [0.15, 0.05, 0.1], [0, 0.1, -0.12]] as [number, number, number][]).map((p, i) => (
-          <mesh key={i} position={p} rotation={V3([0.3, i, 0])} castShadow scale={V3([1, 0.4, 1.4])}><sphereGeometry args={[0.22, 12, 12]} /><meshStandardMaterial color={i % 2 ? "#4fa336" : c} roughness={0.6} /></mesh>
-        ))}
-      </group>
-    );
-  return <mesh castShadow><boxGeometry args={[0.5, 0.4, 0.4]} /><meshStandardMaterial color={c} roughness={0.5} /></mesh>;
-}
+// Kenney Food Kit (CC0) models in /public/models.
+const WHOLE: Record<IngType, string> = {
+  tomato: "/models/tomato.glb",
+  egg: "/models/egg.glb",
+  garlic: "/models/onion.glb",
+  scallion: "/models/scallion.glb",
+  meat: "/models/meat-raw.glb",
+  chili: "/models/chili.glb",
+  bottle: "/models/bottle.glb",
+  greens: "/models/scallion.glb",
+  generic: "/models/onion.glb",
+};
+const RAW_PAN: Partial<Record<IngType, string>> = {
+  tomato: "/models/tomato-slice.glb",
+  egg: "/models/egg-half.glb",
+  meat: "/models/meat-raw.glb",
+};
+const COOKED: Partial<Record<IngType, string>> = {
+  tomato: "/models/tomato-slice.glb",
+  egg: "/models/egg-cooked.glb",
+  meat: "/models/meat-cooked.glb",
+};
 
-/** What an ingredient looks like once it's IN the pan (raw vs cooked). */
-function FoodBit({ type, cooked }: { type: IngType; cooked: boolean }) {
-  if (type === "egg") {
-    if (cooked)
-      return (
-        <group>
-          {([[-0.1, 0, 0], [0.09, 0.02, 0.07], [0.01, 0.01, -0.09]] as [number, number, number][]).map((p, i) => (
-            <mesh key={i} position={p} castShadow><sphereGeometry args={[0.1, 12, 12]} /><meshStandardMaterial color={i % 2 ? "#f7c948" : "#fce8b0"} roughness={0.6} /></mesh>
-          ))}
-        </group>
-      );
-    return (
-      <group>
-        <mesh scale={V3([1, 0.2, 1])}><cylinderGeometry args={[0.3, 0.32, 0.1, 18]} /><meshStandardMaterial color="#fdf6e3" roughness={0.35} transparent opacity={0.92} /></mesh>
-        <mesh position={V3([0, 0.07, 0])} castShadow><sphereGeometry args={[0.12, 16, 16]} /><meshStandardMaterial color="#f5a623" roughness={0.3} /></mesh>
+const ALL_URLS = [
+  "/models/tomato.glb", "/models/tomato-slice.glb", "/models/egg.glb", "/models/egg-half.glb",
+  "/models/egg-cooked.glb", "/models/pan.glb", "/models/plate.glb", "/models/onion.glb",
+  "/models/scallion.glb", "/models/meat-raw.glb", "/models/meat-cooked.glb", "/models/chili.glb",
+  "/models/board.glb", "/models/bottle.glb",
+];
+ALL_URLS.forEach((u) => useGLTF.preload(u));
+
+/** Loads a GLB, clones it, enables shadows, and auto-scales so its largest side ≈ `size`. */
+function Model({ url, size = 0.6, ...props }: { url: string; size?: number } & ThreeElements["group"]) {
+  const { scene } = useGLTF(url);
+  const obj = useMemo(() => {
+    const c = scene.clone(true);
+    c.traverse((o) => {
+      const m = o as THREE.Mesh;
+      if (m.isMesh) {
+        m.castShadow = true;
+        m.receiveShadow = true;
+      }
+    });
+    return c;
+  }, [scene]);
+  const scale = useMemo(() => {
+    const b = new THREE.Box3().setFromObject(obj);
+    const s = b.getSize(new THREE.Vector3());
+    return size / (Math.max(s.x, s.y, s.z) || 1);
+  }, [obj, size]);
+  return (
+    <group {...props}>
+      <group scale={scale}>
+        <primitive object={obj} />
       </group>
-    );
-  }
-  if (type === "tomato") {
-    const col = cooked ? "#b23a2e" : "#e2483f";
-    return (
-      <group>
-        {[0, 1, 2, 3].map((j) => {
-          const a = (j / 4) * Math.PI * 2;
-          return <mesh key={j} position={V3([Math.cos(a) * 0.14, 0.04, Math.sin(a) * 0.14])} rotation={V3([0, a, 0])} castShadow><boxGeometry args={[0.1, 0.07, 0.22]} /><meshStandardMaterial color={col} roughness={0.5} /></mesh>;
-        })}
-      </group>
-    );
-  }
-  if (type === "meat")
-    return (
-      <group>
-        {[0, 1, 2].map((j) => (
-          <mesh key={j} position={V3([(j - 1) * 0.16, 0.05, 0])} castShadow><boxGeometry args={[0.14, 0.1, 0.14]} /><meshStandardMaterial color={cooked ? "#8a4a3a" : "#c0564a"} roughness={0.6} /></mesh>
-        ))}
-      </group>
-    );
-  if (type === "greens" || type === "scallion")
-    return (
-      <group>
-        {[0, 1, 2].map((j) => (
-          <mesh key={j} position={V3([(j - 1) * 0.12, 0.04, 0])} rotation={V3([0.3, j, 0])} scale={V3([1, 0.3, 1.3])} castShadow><sphereGeometry args={[0.12, 10, 10]} /><meshStandardMaterial color={cooked ? "#2f6d22" : "#4fa336"} roughness={0.6} /></mesh>
-        ))}
-      </group>
-    );
-  if (type === "chili")
-    return <mesh rotation={V3([0, 0, 0.5])} castShadow><cylinderGeometry args={[0.04, 0.07, 0.3, 8]} /><meshStandardMaterial color="#c81d1d" /></mesh>;
-  return <mesh castShadow><boxGeometry args={[0.16, 0.12, 0.16]} /><meshStandardMaterial color={TYPE_COLOR[type]} roughness={0.6} /></mesh>;
+    </group>
+  );
 }
 
 function PanContents({ items, cooked, y }: { items: IngType[]; cooked: boolean; y: number }) {
@@ -146,67 +90,44 @@ function PanContents({ items, cooked, y }: { items: IngType[]; cooked: boolean; 
     <group position={V3([0, y, -0.2])}>
       {items.map((type, i) => {
         const a = (i / Math.max(1, items.length)) * Math.PI * 2 + i * 1.3;
-        const r = items.length === 1 ? 0 : 0.32 + (i % 2) * 0.16;
-        return (
-          <group key={i} position={V3([Math.cos(a) * r, 0, Math.sin(a) * r])}>
-            <FoodBit type={type} cooked={cooked} />
-          </group>
-        );
+        const r = items.length === 1 ? 0 : 0.34 + (i % 2) * 0.16;
+        const url = cooked ? COOKED[type] ?? WHOLE[type] : RAW_PAN[type] ?? WHOLE[type];
+        return <Model key={i} url={url} size={0.5} position={V3([Math.cos(a) * r, 0, Math.sin(a) * r])} rotation={V3([0, a, 0])} />;
       })}
     </group>
   );
 }
 
-function Spatula() {
-  return (
-    <group rotation={V3([0, 0, -0.4])}>
-      <mesh castShadow><boxGeometry args={[0.45, 0.05, 0.32]} /><meshStandardMaterial color="#c2c8cf" metalness={0.6} roughness={0.3} /></mesh>
-      <mesh position={V3([0.42, 0.16, 0])} rotation={V3([0, 0, 0.5])}><cylinderGeometry args={[0.04, 0.04, 0.6, 10]} /><meshStandardMaterial color="#5a3a22" /></mesh>
-    </group>
-  );
-}
-
-function PlateMesh(props: ThreeElements["group"]) {
-  return (
-    <group {...props}>
-      <mesh castShadow receiveShadow><cylinderGeometry args={[0.62, 0.55, 0.06, 36]} /><meshStandardMaterial color="#fbfbf7" roughness={0.3} /></mesh>
-      <mesh position={V3([0, 0.04, 0])}><cylinderGeometry args={[0.42, 0.46, 0.03, 36]} /><meshStandardMaterial color="#eef0ec" /></mesh>
-    </group>
-  );
-}
-
-function Pan(props: ThreeElements["group"]) {
-  const steam = useRef<THREE.Group>(null);
+function Steam() {
+  const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
-    const g = steam.current;
+    const g = ref.current;
     if (!g) return;
     g.children.forEach((c, i) => {
       const mesh = c as THREE.Mesh;
       const tt = (state.clock.elapsedTime * 0.5 + i * 0.33) % 1;
-      mesh.position.y = 0.45 + tt * 1.3;
+      mesh.position.y = 0.5 + tt * 1.3;
       mesh.scale.setScalar(0.08 + tt * 0.2);
       (mesh.material as THREE.MeshStandardMaterial).opacity = 0.4 * (1 - tt);
     });
   });
   return (
-    <group {...props}>
-      <mesh castShadow receiveShadow><cylinderGeometry args={[1, 0.88, 0.34, 40]} /><meshStandardMaterial color="#2a2622" roughness={0.35} metalness={0.55} /></mesh>
-      <mesh position={V3([1.45, 0.04, 0])} rotation={V3([0, 0, Math.PI / 2])}><cylinderGeometry args={[0.07, 0.07, 1.1, 14]} /><meshStandardMaterial color="#19150f" roughness={0.5} /></mesh>
-      <group ref={steam}>
-        {[0, 1, 2].map((i) => (
-          <mesh key={i} position={V3([(i - 1) * 0.32, 0.45, 0])}><sphereGeometry args={[0.16, 12, 12]} /><meshStandardMaterial color="#ffffff" transparent opacity={0.4} depthWrite={false} /></mesh>
-        ))}
-      </group>
+    <group ref={ref} position={V3([0, 0, -0.2])}>
+      {[0, 1, 2].map((i) => (
+        <mesh key={i} position={V3([(i - 1) * 0.32, 0.5, 0])}>
+          <sphereGeometry args={[0.16, 12, 12]} />
+          <meshStandardMaterial color="#ffffff" transparent opacity={0.4} depthWrite={false} />
+        </mesh>
+      ))}
     </group>
   );
 }
 
-/** Egg actor: tap to crack — shell splits, yolk drops. */
+/** Egg: tap to crack — whole egg becomes two shell halves tilting apart. */
 function EggActor({ onDone }: { onDone: () => void }) {
   const grp = useRef<THREE.Group>(null);
-  const lh = useRef<THREE.Mesh>(null);
-  const rh = useRef<THREE.Mesh>(null);
-  const yolk = useRef<THREE.Mesh>(null);
+  const lh = useRef<THREE.Group>(null);
+  const rh = useRef<THREE.Group>(null);
   const [cracked, setCracked] = useState(false);
   useFrame((s) => {
     const g = grp.current;
@@ -216,7 +137,6 @@ function EggActor({ onDone }: { onDone: () => void }) {
     } else {
       if (lh.current) lh.current.rotation.z = THREE.MathUtils.lerp(lh.current.rotation.z, 1.0, 0.16);
       if (rh.current) rh.current.rotation.z = THREE.MathUtils.lerp(rh.current.rotation.z, -1.0, 0.16);
-      if (yolk.current) yolk.current.position.y = THREE.MathUtils.lerp(yolk.current.position.y, -0.55, 0.13);
       g.position.y = THREE.MathUtils.lerp(g.position.y, 0.25, 0.1);
     }
   });
@@ -228,19 +148,22 @@ function EggActor({ onDone }: { onDone: () => void }) {
   return (
     <group ref={grp} position={V3([0, 0.6, 1.7])} onClick={tap}>
       {!cracked ? (
-        <mesh castShadow scale={V3([0.82, 1.08, 0.82])}><sphereGeometry args={[0.3, 24, 24]} /><meshStandardMaterial color="#fff3d6" roughness={0.5} /></mesh>
+        <Model url="/models/egg.glb" size={0.5} />
       ) : (
         <>
-          <mesh ref={lh}><sphereGeometry args={[0.3, 20, 16, 0, Math.PI]} /><meshStandardMaterial color="#fff3d6" roughness={0.5} side={THREE.DoubleSide} /></mesh>
-          <mesh ref={rh} rotation={V3([0, Math.PI, 0])}><sphereGeometry args={[0.3, 20, 16, 0, Math.PI]} /><meshStandardMaterial color="#fff3d6" roughness={0.5} side={THREE.DoubleSide} /></mesh>
-          <mesh ref={yolk} castShadow><sphereGeometry args={[0.13, 16, 16]} /><meshStandardMaterial color="#f5a623" roughness={0.3} /></mesh>
+          <group ref={lh} position={V3([-0.05, 0, 0])}>
+            <Model url="/models/egg-half.glb" size={0.45} />
+          </group>
+          <group ref={rh} position={V3([0.05, 0, 0])} rotation={V3([0, Math.PI, 0])}>
+            <Model url="/models/egg-half.glb" size={0.45} />
+          </group>
         </>
       )}
     </group>
   );
 }
 
-/** Generic actor for the current step (bob; tap to perform; stir-fry needs 3 taps). */
+/** Generic actor for the current step (bob; tap; stir-fry = 3 taps with a spatula-ish wobble). */
 function Actor({ step, onDone }: { step: CookStep; onDone: () => void }) {
   const ref = useRef<THREE.Group>(null);
   const goneRef = useRef(false);
@@ -253,27 +176,28 @@ function Actor({ step, onDone }: { step: CookStep; onDone: () => void }) {
       g.position.lerp(new THREE.Vector3(0, 0.4, -0.2), 0.12);
       g.scale.lerp(new THREE.Vector3(0.01, 0.01, 0.01), 0.14);
     } else {
-      g.position.y = 0.55 + Math.sin(state.clock.elapsedTime * 2.6) * 0.07;
+      g.position.y = 0.6 + Math.sin(state.clock.elapsedTime * 2.6) * 0.07;
       if (step.kind === "stirfry") g.rotation.z = Math.sin(state.clock.elapsedTime * 6) * 0.25;
     }
   });
   function tap() {
     if (goneRef.current) return;
-    const n = taps + 1;
-    setTaps(n);
-    if (n >= needed) {
+    const nx = taps + 1;
+    setTaps(nx);
+    if (nx >= needed) {
       goneRef.current = true;
       setTimeout(onDone, 380);
     }
   }
-  let content: ReactNode;
-  if (step.kind === "season") content = <IngredientMesh type="bottle" />;
-  else if (step.kind === "stirfry") content = <Spatula />;
-  else if (step.kind === "plate") content = <PlateMesh />;
-  else content = <IngredientMesh type={ingType(step.item)} />;
+  let url = "/models/onion.glb";
+  if (step.kind === "season") url = "/models/bottle.glb";
+  else if (step.kind === "stirfry") url = "/models/pan.glb";
+  else if (step.kind === "plate") url = "/models/plate.glb";
+  else url = WHOLE[ingType(step.item)];
+  const size = step.kind === "stirfry" ? 1.0 : step.kind === "plate" ? 1.0 : 0.6;
   return (
-    <group ref={ref} position={V3([0, 0.55, 1.7])} onClick={tap}>
-      {content}
+    <group ref={ref} position={V3([0, 0.6, 1.7])} onClick={tap}>
+      <Model url={url} size={size} />
     </group>
   );
 }
@@ -314,35 +238,40 @@ export function KitchenScene({ recipe, onExit }: { recipe: Recipe; onExit: () =>
   })();
 
   const isEggAdd = step?.kind === "add" && ingType(step.item) === "egg";
+  const isChop = step?.kind === "chop";
 
   return (
     <div className="relative mx-auto w-full">
       <div className="h-[74vh] min-h-[460px] w-full overflow-hidden rounded-3xl bg-gradient-to-b from-[#f7e6cf] to-[#e6c89a] shadow-card ring-1 ring-white/40">
         <Canvas shadows camera={{ position: [0, 3.4, 5.4], fov: 40 }}>
-          <ambientLight intensity={0.75} />
-          <directionalLight position={[4, 7, 4]} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
+          <ambientLight intensity={0.8} />
+          <directionalLight position={V3([4, 7, 4])} intensity={1.2} castShadow shadow-mapSize={[1024, 1024]} />
           <mesh receiveShadow position={V3([0, -0.18, 0])}>
             <boxGeometry args={[8, 0.36, 4.6]} />
             <meshStandardMaterial color="#caa472" roughness={0.85} />
           </mesh>
 
-          {done ? (
-            <>
-              <PlateMesh position={V3([0, 0.04, 0.2])} />
-              <PanContents items={pan} cooked y={0.12} />
-            </>
-          ) : (
-            <>
-              <Pan position={V3([0, 0.18, -0.2])} />
-              <PanContents items={pan} cooked={cooked} y={0.3} />
-              {step &&
-                (isEggAdd ? (
-                  <EggActor key={idx} onDone={completeStep} />
-                ) : (
-                  <Actor key={idx} step={step} onDone={completeStep} />
-                ))}
-            </>
-          )}
+          <Suspense fallback={null}>
+            {done ? (
+              <>
+                <Model url="/models/plate.glb" size={1.8} position={V3([0, 0.02, 0.2])} />
+                <PanContents items={pan} cooked y={0.18} />
+              </>
+            ) : (
+              <>
+                <Model url="/models/pan.glb" size={2.4} position={V3([0, 0.02, -0.2])} />
+                <Steam />
+                <PanContents items={pan} cooked={cooked} y={0.34} />
+                {isChop && step && <Model url="/models/board.glb" size={1.6} position={V3([0, 0.02, 1.7])} />}
+                {step &&
+                  (isEggAdd ? (
+                    <EggActor key={idx} onDone={completeStep} />
+                  ) : (
+                    <Actor key={idx} step={step} onDone={completeStep} />
+                  ))}
+              </>
+            )}
+          </Suspense>
 
           <ContactShadows position={V3([0, 0, 0])} opacity={0.35} scale={12} blur={2.6} far={4} />
           <OrbitControls enablePan={false} minPolarAngle={0.4} maxPolarAngle={1.45} minDistance={3.4} maxDistance={9} autoRotate={done} autoRotateSpeed={0.6} />
