@@ -11,6 +11,7 @@ import {
   Sparkles,
   CreditCard,
   Settings,
+  ChefHat,
   type LucideIcon,
 } from "lucide-react";
 
@@ -27,6 +28,7 @@ export type NavKey =
   | "shopping"
   | "family"
   | "community"
+  | "kitchen"
   | "plans"
   | "settings";
 
@@ -41,6 +43,7 @@ export const NAV_ITEMS: { href: string; key: NavKey; Icon: LucideIcon }[] = [
   { href: "/shopping", key: "shopping", Icon: ShoppingCart },
   { href: "/family", key: "family", Icon: Users },
   { href: "/community", key: "community", Icon: Sparkles },
+  { href: "/kitchen", key: "kitchen", Icon: ChefHat },
   { href: "/upgrade", key: "plans", Icon: CreditCard },
   { href: "/settings", key: "settings", Icon: Settings },
 ];

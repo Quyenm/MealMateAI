@@ -240,3 +240,31 @@ export async function streamCookChat(history: ChatTurn[], contextText: string) {
     ] as OpenAI.Chat.Completions.ChatCompletionMessageParam[],
   });
 }
+
+// ─────────────────────────── Kitchen game ───────────────────────────
+
+const KITCHEN_SYSTEM =
+  "Bạn tạo 'kịch bản nấu' cho một game nấu ăn casual. Cho TÊN một món Việt, trả về JSON " +
+  '{"steps":[...]} gồm 4-6 bước theo thứ tự nấu hợp lý (sơ chế → cho vào chảo → xào/nấu → nêm → bày). ' +
+  "Mỗi bước là ĐÚNG một trong các dạng: " +
+  '{"kind":"chop","item":"<nguyên liệu>","slices":<2-6>} | ' +
+  '{"kind":"add","item":"<nguyên liệu>"} | ' +
+  '{"kind":"stirfry","seconds":<6-14>} | ' +
+  '{"kind":"season","item":"<gia vị>"} | ' +
+  '{"kind":"plate","garnish":"<rắc gì, có thể bỏ>"}. ' +
+  "item/garnish viết tiếng Việt ngắn gọn. CHỈ trả JSON thuần, không chữ thừa, không bịa món không có thật.";
+
+/** Generate a cooking-game recipe script for an arbitrary dish title (returns raw JSON to validate). */
+export async function generateRecipeScript(title: string) {
+  const res = await client().chat.completions.create({
+    model: MODEL,
+    response_format: { type: "json_object" },
+    max_completion_tokens: 500,
+    messages: [
+      { role: "system", content: KITCHEN_SYSTEM },
+      { role: "user", content: `Món: ${title}` },
+    ],
+  });
+  const parsed = parseJsonContent(res) as { steps?: unknown };
+  return { steps: parsed.steps, cost: costOf(res.usage) };
+}

@@ -35,6 +35,8 @@ const LIMITERS = {
   analytics: make(100, "1 m"),
   // AI chat — anti-burst per user (daily cap is enforced separately by tier).
   chat: make(20, "1 m"),
+  // Kitchen-game recipe generation (VIP+ only; bounded further by spend cap).
+  kitchen: make(20, "10 m"),
 } as const;
 
 export type RateKey = keyof typeof LIMITERS;
