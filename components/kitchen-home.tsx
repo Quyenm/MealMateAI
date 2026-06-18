@@ -6,8 +6,18 @@ import { toast } from "sonner";
 import { useT, useLang } from "@/components/landing/i18n";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { KitchenGame } from "@/components/kitchen-game";
+import dynamic from "next/dynamic";
 import { CURATED, type Recipe } from "@/lib/kitchen/recipes";
+
+// 3D scene is client-only (Three.js) — load without SSR.
+const KitchenScene = dynamic(() => import("@/components/kitchen-scene").then((m) => m.KitchenScene), {
+  ssr: false,
+  loading: () => (
+    <div className="flex h-[62vh] min-h-[440px] items-center justify-center rounded-3xl bg-card text-sm text-muted-foreground shadow-card ring-1 ring-white/60">
+      3D…
+    </div>
+  ),
+});
 
 export function KitchenHome() {
   const t = useT().kitchen;
@@ -46,7 +56,7 @@ export function KitchenHome() {
 
   if (recipe) {
     return (
-      <KitchenGame
+      <KitchenScene
         recipe={recipe}
         onExit={() => {
           setRecipe(null);
