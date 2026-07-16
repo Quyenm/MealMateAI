@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
 import { STR } from "@/lib/i18n/strings";
 import { AdminPaymentActions } from "@/components/admin-payment-actions";
+import { summarizeTierCommercialMetrics, type TierPrice, type TierProfile } from "@/lib/admin-tier-metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -56,14 +57,14 @@ export default async function AdminPage() {
   const weekAgoMs = Date.now() - 7 * 86400000;
 
   const admin = createAdminClient();
-  const [pendingList, profilesRes, paidRes, scansTotalRes, scansTodayRes] = await Promise.all([
+  const [pendingList, profilesRes, tierLimitsRes, scansTotalRes, scansTodayRes] = await Promise.all([
     admin
       .from("payments")
       .select("id, amount_vnd, tier_purchased, user_id, created_at, profiles(email)")
       .eq("status", "pending")
       .order("created_at", { ascending: false }),
     admin.from("profiles").select("tier, created_at"),
-    admin.from("payments").select("amount_vnd, tier_purchased, created_at").eq("status", "paid"),
+    admin.from("tier_limits").select("tier, price_vnd"),
     admin.from("scans").select("id", { count: "exact", head: true }).is("deleted_at", null),
     admin
       .from("scans")
@@ -74,7 +75,11 @@ export default async function AdminPage() {
 
   const rows = (pendingList.data ?? []) as unknown as Row[];
 
-  const profiles = (profilesRes.data ?? []) as { tier: string; created_at: string }[];
+  if (profilesRes.error) throw new Error("Failed to load profile tier metrics");
+  if (tierLimitsRes.error) throw new Error("Failed to load live tier prices");
+
+  const profiles = (profilesRes.data ?? []) as TierProfile[];
+  const tierPrices = (tierLimitsRes.data ?? []) as TierPrice[];
   const totalUsers = profiles.length;
   const newUsers7d = profiles.filter((p) => Date.parse(p.created_at) >= weekAgoMs).length;
   const usersByTier = profiles.reduce<Record<string, number>>((m, p) => {
@@ -82,17 +87,13 @@ export default async function AdminPage() {
     return m;
   }, {});
 
-  const paid = (paidRes.data ?? []) as { amount_vnd: number; tier_purchased: string; created_at: string }[];
-  const revenueTotal = paid.reduce((s, p) => s + (p.amount_vnd ?? 0), 0);
-  const revenueMonth = paid
-    .filter((p) => Date.parse(p.created_at) >= monthStartMs)
-    .reduce((s, p) => s + (p.amount_vnd ?? 0), 0);
-  const soldByTier = paid.reduce<Record<string, { count: number; revenue: number }>>((m, p) => {
-    const e = (m[p.tier_purchased] ??= { count: 0, revenue: 0 });
-    e.count += 1;
-    e.revenue += p.amount_vnd ?? 0;
-    return m;
-  }, {});
+  const commercial = summarizeTierCommercialMetrics(profiles, tierPrices);
+  const revenueTotal = commercial.revenueTotal;
+  const revenueMonth = summarizeTierCommercialMetrics(
+    profiles.filter((p) => Date.parse(p.created_at) >= monthStartMs),
+    tierPrices,
+  ).revenueTotal;
+  const soldByTier = commercial.byTier;
 
   const pendingCount = rows.length;
   const scansTotal = scansTotalRes.count ?? 0;
@@ -143,7 +144,7 @@ export default async function AdminPage() {
         <Stat
           icon={Package}
           label={t.statSold}
-          value={paid.length.toLocaleString(numLocale)}
+          value={commercial.paidUserCount.toLocaleString(numLocale)}
           sub={`${pendingCount} ${t.statPending}`}
         />
         <Stat

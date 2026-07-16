@@ -6,6 +6,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { getLocale } from "@/lib/i18n/server";
 import { STR } from "@/lib/i18n/strings";
 import { AdminBarChart } from "@/components/admin-bar-chart";
+import { summarizeTierCommercialMetrics, type TierPrice, type TierProfile } from "@/lib/admin-tier-metrics";
 
 export const dynamic = "force-dynamic";
 
@@ -17,8 +18,7 @@ const vnDay = (d: Date) => new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Ho
 function timeWindow() {
   const now = Date.now();
   const days = Array.from({ length: DAYS }, (_, i) => vnDay(new Date(now - (DAYS - 1 - i) * 86400000)));
-  const sinceIso = new Date(now - DAYS * 86400000).toISOString();
-  return { days, sinceIso };
+  return { days };
 }
 
 export default async function AdminChartsPage() {
@@ -32,26 +32,27 @@ export default async function AdminChartsPage() {
   const num = (n: number) => n.toLocaleString(numLocale);
 
   // Last 30 VN days as YYYY-MM-DD, oldest → newest.
-  const { days, sinceIso } = timeWindow();
+  const { days } = timeWindow();
 
   const admin = createAdminClient();
-  const [paidRes, signupRes] = await Promise.all([
-    admin.from("payments").select("amount_vnd, created_at").eq("status", "paid").gte("created_at", sinceIso),
-    admin.from("profiles").select("created_at").gte("created_at", sinceIso),
+  const [profilesRes, tierLimitsRes] = await Promise.all([
+    admin.from("profiles").select("tier, created_at"),
+    admin.from("tier_limits").select("tier, price_vnd"),
   ]);
 
-  const revByDay: Record<string, number> = Object.fromEntries(days.map((d) => [d, 0]));
-  for (const p of paidRes.data ?? []) {
-    const d = vnDay(new Date(p.created_at));
-    if (d in revByDay) revByDay[d] += p.amount_vnd ?? 0;
-  }
+  if (profilesRes.error) throw new Error("Failed to load profile tier metrics");
+  if (tierLimitsRes.error) throw new Error("Failed to load live tier prices");
+
+  const profiles = (profilesRes.data ?? []) as TierProfile[];
+  const tierPrices = (tierLimitsRes.data ?? []) as TierPrice[];
+  const commercial = summarizeTierCommercialMetrics(profiles, tierPrices, days);
   const signByDay: Record<string, number> = Object.fromEntries(days.map((d) => [d, 0]));
-  for (const s of signupRes.data ?? []) {
+  for (const s of profiles) {
     const d = vnDay(new Date(s.created_at));
     if (d in signByDay) signByDay[d] += 1;
   }
 
-  const revenue = days.map((d) => revByDay[d]);
+  const revenue = days.map((d) => commercial.revenueByDay[d]);
   const signups = days.map((d) => signByDay[d]);
 
   return (
